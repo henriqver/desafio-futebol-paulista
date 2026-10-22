@@ -49,7 +49,8 @@ function baixarCSV(nome, linhas){
 }
 function tabela(id, titulo, itens, tipo){
   const sec=document.getElementById(id);
-  const arquivo = n => urlImagem(tipo+':'+slug(n)).split('/').map(decodeURIComponent).join('/');
+  const pasta = tipo==='clube'?CONFIG.pastaEscudos:CONFIG.pastaFotos;
+  const arquivo = n => nomesBase(tipo+':'+slug(n)).map(b=>pasta+b+(/\.(png|jpe?g|webp)$/i.test(b)?'':'.png')).join('  ou  ');
   sec.innerHTML=`<h2>${titulo}</h2>
     <div class="barra"><select><option value="todos">Todos</option><option value="falta">Só os que faltam</option><option value="ok">Só os encontrados</option></select>
     <button type="button">Baixar lista (CSV)</button><span class="muted"></span></div>
@@ -63,7 +64,7 @@ function tabela(id, titulo, itens, tipo){
   sel.onchange=desenhar;
   sec.querySelector('button').onclick=()=>baixarCSV(`${id}.csv`,[['Nome','Arquivo esperado','Status','Uso'],...linhas.map(l=>[l.nome,l.arq,l.st?'Encontrado':'Faltando',l.uso])]);
   desenhar();
-  Promise.all(linhas.map(async l=>{ l.st=await existe(tipo+':'+slug(l.nome)) })).then(desenhar);
+  Promise.all(linhas.map(async l=>{ const r=await carregarImagem(tipo+':'+slug(l.nome)); l.st=!!r; if(r) l.arq=decodeURIComponent(r.url) })).then(desenhar);
   let t=setInterval(desenhar,1500); setTimeout(()=>clearInterval(t),12000);
 }
 carregarDados().then(()=>{
@@ -81,7 +82,9 @@ carregarDados().then(()=>{
     <li>Times paulistas encontrados (nº de jogadores): ${esc(clubesSP.join(' · '))}.</li></ul></div>`;
   const usoClube=new Map();
   J.forEach(j=>{ j.paulistas.forEach(c=>usoClube.set(c,'Paulista')); j.carreira.forEach(c=>{ if(!usoClube.has(c)) usoClube.set(c,'Carreira') }) });
-  const clubes=[...usoClube.entries()].sort((a,b)=>a[1].localeCompare(b[1],'pt')*-1||a[0].localeCompare(b[0],'pt')).map(([nome,uso])=>({nome,uso:uso==='Paulista'?'Time paulista':'Só na carreira'}));
+  DB.clubesComEscudo.forEach(c=>{ if(!usoClube.has(c)) usoClube.set(c,'Escudo') });
+  const ordem={Paulista:0,Carreira:1,Escudo:2}, rot={Paulista:'Time paulista',Carreira:'Só na carreira',Escudo:'Só no desafio de escudos'};
+  const clubes=[...usoClube.entries()].sort((a,b)=>ordem[a[1]]-ordem[b[1]]||a[0].localeCompare(b[0],'pt')).map(([nome,uso])=>({nome,uso:rot[uso]}));
   tabela('escudos','Escudos',clubes,'clube');
   tabela('fotos','Fotos dos jogadores',[...J].sort((a,b)=>a.nome.localeCompare(b.nome,'pt')).map(j=>({nome:j.nome,uso:j.paulistas.join(', ')})),'jogador');
 }).catch(e=>{ document.getElementById('estado').textContent=e.message+'. Abra esta página pelo endereço do site (ou por um servidor local).' });
