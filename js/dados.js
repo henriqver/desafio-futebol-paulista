@@ -9,6 +9,7 @@ const CONFIG = {
   quiz:      'dados/quiz.csv',        // Pergunta, Resposta certa, Errada 1, Errada 2, Errada 3
   ranking:   'dados/ranking.csv',     // Jogo, Nome, Pontos, Link do vídeo
   escudos:   'dados/escudos.csv',     // (opcional) Clube, Arquivo — para usar nomes de arquivo diferentes do padrão
+  clubes:    'dados/clubes.csv',      // Clube, País, Estado — usado para montar alternativas erradas parecidas
   pastaEscudos: 'escudos/',           // padrão: escudos/<nome-do-clube>.png   (ex.: escudos/sao-paulo.png)
   pastaFotos:   'jogadores/',         // padrão: jogadores/<nome-do-jogador>.png (ex.: jogadores/ademir-da-guia.png)
   narracao:     'narracao/'           // áudios gerados por ferramentas/gerar_narracao.py (entram no vídeo)
@@ -50,10 +51,11 @@ async function baixar(url, obrigatorio){
 }
 
 /* base carregada */
-const DB = {jogadores:[], porClube:new Map(), quiz:[], ranking:{}, mapaEscudos:{}, clubesComEscudo:[], problemas:[]};
+const DB = {jogadores:[], porClube:new Map(), quiz:[], ranking:{}, mapaEscudos:{}, clubesComEscudo:[], clubeInfo:{}, problemas:[]};
 let RANKING_FIXO = {};
 async function carregarDados(){
-  const [jog, quiz, rank, esc] = await Promise.all([baixar(CONFIG.jogadores,true), baixar(CONFIG.quiz), baixar(CONFIG.ranking), baixar(CONFIG.escudos)]);
+  const [jog, quiz, rank, esc, clu] = await Promise.all([baixar(CONFIG.jogadores,true), baixar(CONFIG.quiz), baixar(CONFIG.ranking), baixar(CONFIG.escudos), baixar(CONFIG.clubes)]);
+  clu.forEach(r=>{ const c=col(r,'Clube'); if(c) DB.clubeInfo[slug(clubeOk(c))]={pais:col(r,'País','Pais'), uf:col(r,'Estado','UF')} });
   const vistos=new Set();
   jog.forEach((r,i)=>{
     const nome=col(r,'Jogador'); if(!nome) return;
@@ -103,3 +105,25 @@ function carregarImagem(key){
 }
 const existe = key => carregarImagem(key).then(r=>!!r);
 async function filtrarComImagem(tipo, nomes){ const ok=await Promise.all(nomes.map(n=>existe(tipo+':'+slug(n)))); return nomes.filter((_,i)=>ok[i]) }
+
+/* semelhança entre clubes: mesmo clube 4; mesmo estado (Brasil) ou mesmo país (exterior) 3; mesma região 2; Brasil, estados diferentes 1 */
+const REGIAO={'Brasil':'Brasil','Argentina':'América do Sul','Uruguai':'América do Sul','Paraguai':'América do Sul','Colômbia':'América do Sul','Chile':'América do Sul',
+  'Equador':'América do Sul','Peru':'América do Sul','Venezuela':'América do Sul','Bolívia':'América do Sul','México':'América do Norte','EUA':'América do Norte',
+  'Arábia Saudita':'Oriente Médio','Catar':'Oriente Médio','Emirados Árabes':'Oriente Médio','Japão':'Ásia','Coreia do Sul':'Ásia','China':'Ásia','Índia':'Ásia',
+  'Indonésia':'Ásia','Vietnã':'Ásia','Uzbequistão':'Ásia','Angola':'África'};
+const regiao = pais => pais ? (REGIAO[pais]||'Europa') : '';
+const infoClube = c => DB.clubeInfo[slug(c)] || {};
+function simClube(a,b){
+  if(a===b) return 4;
+  const x=infoClube(a), y=infoClube(b); if(!x.pais||!y.pais) return 0;
+  if(x.pais===y.pais) return x.pais==='Brasil' ? (x.uf&&x.uf===y.uf?3:1) : 3;
+  return regiao(x.pais)===regiao(y.pais) ? 2 : 0;
+}
+const clubesDe = j => [...new Set([...j.paulistas, ...j.carreira])];
+const jogouEm = (j,c) => j.paulistas.includes(c) || j.carreira.includes(c);
+/* só afirma que NÃO jogou quando há informação: times paulistas pela coluna de paulistas; os demais, pela carreira completa */
+function naoJogouEm(j,c){
+  const paulista = DB.porClube.has(c) || infoClube(c).uf==='SP';
+  if(paulista) return !j.paulistas.includes(c) && !j.carreira.includes(c);
+  return j.carreira.length>0 && !j.carreira.includes(c);
+}
