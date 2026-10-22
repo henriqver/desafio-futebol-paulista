@@ -7,16 +7,16 @@
 <title>Conferência — Desafio Futebol Paulista</title>
 <link rel="stylesheet" href="fontes/fontes.css">
 <style>
-:root{--bg:#EEF2EC; --surface:#fff; --text:#13241B; --muted:#5B6B61; --line:#D3DCD5; --ok:#067647; --falta:#B42318; --accent:#0E4D33; color-scheme:light}
-@media (prefers-color-scheme: dark){ :root{--bg:#08140E; --surface:#10241A; --text:#EAF1EC; --muted:#9DB0A4; --line:#24402F; --ok:#3DD68C; --falta:#F97066; --accent:#FFC233; color-scheme:dark} }
+:root{--bg:#F3F3FB; --surface:#fff; --text:#000052; --muted:#4A4A7A; --line:#DADAF0; --ok:#067647; --falta:#D1105A; --accent:#0000FF; color-scheme:light}
+@media (prefers-color-scheme: dark){ :root{--bg:#00003D; --surface:#000070; --text:#fff; --muted:rgba(255,255,255,.7); --line:rgba(255,255,255,.18); --ok:#19E3FF; --falta:#FF2476; --accent:#FF5A0A; color-scheme:dark} }
 *{box-sizing:border-box}
-body{margin:0; background:var(--bg); color:var(--text); font:15px/1.5 "Barlow",system-ui,sans-serif}
+body{margin:0; background:var(--bg); color:var(--text); font:15px/1.5 "Montserrat",system-ui,sans-serif}
 main{max-width:980px; margin:0 auto; padding:24px 16px 48px}
-h1,h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif; margin:0 0 8px}
+h1,h2{font-family:"Montserrat",sans-serif; font-weight:900; text-transform:uppercase; margin:0 0 8px}
 h1{font-size:36px} h2{font-size:26px; margin-top:28px}
 .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:16px 0}
 .kpi{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px}
-.kpi b{display:block; font:800 30px "Barlow Condensed",sans-serif}
+.kpi b{display:block; font:900 28px "Montserrat",sans-serif}
 .kpi span{color:var(--muted); font-size:13px}
 .box{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:4px 14px; overflow-x:auto}
 table{width:100%; border-collapse:collapse; font-size:14px}
@@ -26,7 +26,7 @@ td code{font-size:13px}
 .ok{color:var(--ok); font-weight:700} .falta{color:var(--falta); font-weight:700}
 ul{margin:8px 0; padding-left:20px} li{margin:4px 0}
 .barra{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:6px 0 10px}
-button{font:700 16px "Barlow Condensed",sans-serif; background:var(--accent); color:var(--bg); border:0; border-radius:10px; padding:8px 14px; cursor:pointer}
+button{font:800 14px "Montserrat",sans-serif; text-transform:uppercase; background:#FF5A0A; color:#fff; border:0; border-radius:10px; padding:8px 14px; cursor:pointer}
 select{font:inherit; padding:6px; border-radius:8px; border:1px solid var(--line); background:var(--surface); color:var(--text)}
 .muted{color:var(--muted)}
 </style>
@@ -40,7 +40,7 @@ select{font:inherit; padding:6px; border-radius:8px; border:1px solid var(--line
   <section id="escudos"></section>
   <section id="fotos"></section>
 </main>
-<script src="js/dados.js"></script>
+<script src="js/dados.js?v=2026-10-22"></script>
 <script>
 const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function baixarCSV(nome, linhas){
