@@ -10,8 +10,9 @@ O que o script faz:
      (perguntas fixas, nomes de clubes, nomes de jogadores e perguntas do quiz).
   2. Grava narracao/roteiro.csv com todas as falas e o nome de arquivo de cada uma
      (serve também para gravar com um locutor, se a FPF preferir).
-  3. Se houver chave do Azure (variáveis AZURE_TTS_KEY e AZURE_TTS_REGION),
-     gera os MP3 que ainda não existem.
+  3. Gera os MP3 que ainda não existem, com o serviço configurado:
+       - ElevenLabs: variáveis ELEVENLABS_API_KEY e ELEVENLABS_VOICE_ID (opcional: ELEVENLABS_MODEL)
+       - ou Azure:   variáveis AZURE_TTS_KEY e AZURE_TTS_REGION
   4. Atualiza narracao/indice.json com os áudios disponíveis.
 
 Uso:  python ferramentas/gerar_narracao.py
@@ -33,7 +34,7 @@ PRONUNCIA = {"Botafogo-SP": "Botafogo de Ribeirão Preto", "Juventus-SP": "Juven
              "Comercial-SP": "Comercial", "River Plate (URU)": "River Plate", "Universidad Católica (EQU)": "Universidad Católica",
              "PSV": "P S V", "CSKA Moscou": "CSKA de Moscou",
              "Barcelona-SP": "Barcelona", "Flamengo-SP": "Flamengo de Guarulhos", "América-SP": "América de Rio Preto", "Rio Branco-SP": "Rio Branco de Americana", "Independente-SP": "Independente de Limeira", "ECUS": "E C U S", "USAC": "U S A C"}
-ALIAS = {"S. Caetano": "São Caetano", "Sao Paulo": "São Paulo", "Red Bull Bragantino": "Bragantino"}
+ALIAS = {"S. Caetano": "São Caetano", "Sao Paulo": "São Paulo", "Bragantino": "Red Bull Bragantino"}
 
 
 def slug(t):
@@ -96,6 +97,23 @@ def sintetizar(texto, chave, regiao):
             raise
 
 
+def sintetizar_elevenlabs(texto, chave, voz):
+    modelo = os.environ.get("ELEVENLABS_MODEL", "eleven_multilingual_v2")
+    corpo = json.dumps({"text": PRONUNCIA.get(texto, texto), "model_id": modelo,
+                        "voice_settings": {"stability": 0.5, "similarity_boost": 0.75, "style": 0.3, "use_speaker_boost": True}}).encode("utf-8")
+    req = urllib.request.Request(
+        f"https://api.elevenlabs.io/v1/text-to-speech/{voz}?output_format=mp3_44100_128", data=corpo, method="POST",
+        headers={"xi-api-key": chave, "Content-Type": "application/json", "Accept": "audio/mpeg"})
+    for tentativa in range(5):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                return r.read()
+        except urllib.error.HTTPError as e:
+            if e.code in (429, 500, 502, 503) and tentativa < 4:
+                time.sleep(3 * (tentativa + 1)); continue
+            raise RuntimeError(f"ElevenLabs respondeu {e.code}: {e.read()[:300]!r}")
+
+
 def main():
     PASTA.mkdir(exist_ok=True)
     todas = falas()
@@ -104,15 +122,33 @@ def main():
         for t in todas:
             arq = f"{slug(t)}.mp3"
             w.writerow([t, PRONUNCIA.get(t, ""), f"narracao/{arq}", "ok" if (PASTA / arq).exists() else "faltando"])
+    el_chave, el_voz = os.environ.get("ELEVENLABS_API_KEY"), os.environ.get("ELEVENLABS_VOICE_ID")
     chave, regiao = os.environ.get("AZURE_TTS_KEY"), os.environ.get("AZURE_TTS_REGION")
+    if el_chave and el_voz:
+        gerar, servico = (lambda t: sintetizar_elevenlabs(t, el_chave, el_voz)), "ElevenLabs"
+    elif chave and regiao:
+        gerar, servico = (lambda t: sintetizar(t, chave, regiao)), "Azure"
+    else:
+        gerar, servico = None, None
     faltando = [t for t in todas if not (PASTA / f"{slug(t)}.mp3").exists()]
-    print(f"{len(todas)} falas; {len(faltando)} sem áudio.")
-    if faltando and not (chave and regiao):
-        print("AZURE_TTS_KEY/AZURE_TTS_REGION não configuradas: nenhum áudio novo gerado (o roteiro foi atualizado).")
+    print(f"{len(todas)} falas; {len(faltando)} sem áudio; {sum(len(t) for t in faltando)} caracteres a gerar.")
+    if faltando and not gerar:
+        print("Nenhum serviço de voz configurado: nenhum áudio novo gerado (o roteiro foi atualizado).")
     elif faltando:
-        for n, t in enumerate(faltando, 1):
-            (PASTA / f"{slug(t)}.mp3").write_bytes(sintetizar(t, chave, regiao))
-            print(f"[{n}/{len(faltando)}] {t}")
+        print(f"Gerando com {servico}…")
+        limite = int(os.environ.get("NARRACAO_LIMITE_CARACTERES", "0") or 0)
+        usados = 0
+        try:
+            for n, t in enumerate(faltando, 1):
+                if limite and usados + len(t) > limite:
+                    print(f"Limite de {limite} caracteres atingido; o restante fica para a próxima execução.")
+                    break
+                (PASTA / f"{slug(t)}.mp3").write_bytes(gerar(t))
+                usados += len(t)
+                print(f"[{n}/{len(faltando)}] {t}")
+        except Exception as e:
+            # cota esgotada ou falha de rede: guarda o que já foi gerado e continua na próxima execução
+            print(f"Interrompido: {e}")
     disponiveis = sorted(p.stem for p in PASTA.glob("*.mp3"))
     (PASTA / "indice.json").write_text(json.dumps(disponiveis, ensure_ascii=False), encoding="utf-8")
     print(f"indice.json: {len(disponiveis)} áudios.")
