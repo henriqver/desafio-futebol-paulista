@@ -10,8 +10,13 @@ const CONFIG = {
   ranking:   'dados/ranking.csv',     // Jogo, Nome, Pontos, Link do vídeo
   escudos:   'dados/escudos.csv',     // (opcional) Clube, Arquivo — para usar nomes de arquivo diferentes do padrão
   pastaEscudos: 'escudos/',           // padrão: escudos/<nome-do-clube>.png   (ex.: escudos/sao-paulo.png)
-  pastaFotos:   'jogadores/'          // padrão: jogadores/<nome-do-jogador>.png (ex.: jogadores/ademir-da-guia.png)
+  pastaFotos:   'jogadores/',         // padrão: jogadores/<nome-do-jogador>.png (ex.: jogadores/ademir-da-guia.png)
+  narracao:     'narracao/'           // áudios gerados por ferramentas/gerar_narracao.py (entram no vídeo)
 };
+/* como a voz do navegador deve pronunciar alguns nomes (a narração gravada usa a mesma lista) */
+const PRONUNCIA = {'Botafogo-SP':'Botafogo de Ribeirão Preto','Juventus-SP':'Juventus da Mooca','Nacional-SP':'Nacional','Comercial-SP':'Comercial',
+  'River Plate (URU)':'River Plate','Universidad Católica (EQU)':'Universidad Católica','PSV':'P S V','CSKA Moscou':'CSKA de Moscou'};
+const pronuncia = t => PRONUNCIA[t]||t;
 /* grafias diferentes do mesmo clube na coluna de times paulistas */
 const ALIAS_CLUBE = {'S. Caetano':'São Caetano', 'Sao Paulo':'São Paulo', 'Red Bull Bragantino':'Bragantino'};
 const ARTIGO_NA = ['Ponte Preta','Portuguesa','Ferroviária','Inter de Limeira','Francana','Matonense','Internacional de Limeira'];
@@ -44,7 +49,7 @@ async function baixar(url, obrigatorio){
 }
 
 /* base carregada */
-const DB = {jogadores:[], porClube:new Map(), quiz:[], ranking:{}, mapaEscudos:{}, problemas:[]};
+const DB = {jogadores:[], porClube:new Map(), quiz:[], ranking:{}, mapaEscudos:{}, clubesComEscudo:[], problemas:[]};
 let RANKING_FIXO = {};
 async function carregarDados(){
   const [jog, quiz, rank, esc] = await Promise.all([baixar(CONFIG.jogadores,true), baixar(CONFIG.quiz), baixar(CONFIG.ranking), baixar(CONFIG.escudos)]);
@@ -67,18 +72,33 @@ async function carregarDados(){
   RANKING_FIXO=Object.fromEntries(jogos.map(g=>[g,[]]));
   rank.forEach(r=>{ const g=slug(col(r,'Jogo')), pts=parseInt(String(col(r,'Pontos')).replace(/\D/g,''),10);
     if(RANKING_FIXO[g]&&col(r,'Nome')&&pts>=0) RANKING_FIXO[g].push({nome:col(r,'Nome'), pontos:pts, video:col(r,'Link do vídeo','Video','Link')}) });
-  esc.forEach(r=>{ const c=col(r,'Clube'), a=col(r,'Arquivo'); if(c&&a) DB.mapaEscudos[slug(clubeOk(c))]=a });
+  esc.forEach(r=>{ const c=col(r,'Clube'), a=col(r,'Arquivo'); if(c&&a){ DB.mapaEscudos[slug(clubeOk(c))]=a; DB.clubesComEscudo.push(clubeOk(c)) } });
 }
-function urlImagem(key){
+/* Imagens: tenta o nome registrado em escudos.csv (aceita alternativas separadas por "|")
+   e o nome padrão, com as extensões .png, .PNG, .jpg, .jpeg e .webp */
+const EXTS=['.png','.PNG','.jpg','.jpeg','.webp'];
+function nomesBase(key){
   const [tipo,id]=key.split(':');
-  if(tipo==='clube') return CONFIG.pastaEscudos+encodeURIComponent(DB.mapaEscudos[id]||id+'.png');
-  return CONFIG.pastaFotos+encodeURIComponent(id+'.png');
+  const reg=tipo==='clube'&&DB.mapaEscudos[id] ? DB.mapaEscudos[id].split('|').map(x=>x.trim()).filter(Boolean) : [];
+  return [...reg, id];
 }
-/* confere quais imagens existem (usado pelos desafios de escudo e silhueta) */
-const EXISTE=new Map();
-function existe(key){
-  if(EXISTE.has(key)) return EXISTE.get(key);
-  const p=new Promise(res=>{ const im=new Image(); const t=setTimeout(()=>res(false),8000); im.onload=()=>{clearTimeout(t); res(true)}; im.onerror=()=>{clearTimeout(t); res(false)}; im.src=urlImagem(key) });
-  EXISTE.set(key,p); return p;
+function candidatos(key){
+  const pasta=key.startsWith('clube:')?CONFIG.pastaEscudos:CONFIG.pastaFotos, out=[];
+  nomesBase(key).forEach(b=>{ if(/\.(png|jpe?g|webp)$/i.test(b)) out.push(b); else EXTS.forEach(e=>out.push(b+e)) });
+  return [...new Set(out)].map(f=>pasta+encodeURIComponent(f.normalize('NFC')));
 }
+const IMGS=new Map();
+function carregarImagem(key){
+  if(IMGS.has(key)) return IMGS.get(key);
+  const p=(async()=>{
+    for(const u of candidatos(key)){
+      const im=await new Promise(res=>{ const i=new Image(); const t=setTimeout(()=>res(null),8000);
+        i.onload=()=>{clearTimeout(t); res(i)}; i.onerror=()=>{clearTimeout(t); res(null)}; i.src=u });
+      if(im) return {im, url:u};
+    }
+    return null;
+  })();
+  IMGS.set(key,p); return p;
+}
+const existe = key => carregarImagem(key).then(r=>!!r);
 async function filtrarComImagem(tipo, nomes){ const ok=await Promise.all(nomes.map(n=>existe(tipo+':'+slug(n)))); return nomes.filter((_,i)=>ok[i]) }
