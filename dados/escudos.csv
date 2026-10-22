@@ -1,74 +1,129 @@
 ﻿Clube,Arquivo
-Corinthians,SC CORINTHIANS PTA - SP
-Palmeiras,SE PALMEIRAS - SP
-São Paulo,SÃO PAULO FC - SP(2) | SÃO PAULO FC - SP
-Santos,SANTOS - SP
-Guarani,GUARANI FC - SP
-Ponte Preta,AA PONTE PRETA - SP
-Portuguesa,PORTUGUESA SAF - SP
-Portuguesa Santista,AA PORTUGUESA - SP
-Bragantino,RED BULL BRAGANTINO - SP | RED BULL BRAGANTINO SAF - SP | RED BULL BRAGANTINO LTDA - SP
-Red Bull Bragantino,RED BULL BRAGANTINO - SP | RED BULL BRAGANTINO SAF - SP | RED BULL BRAGANTINO LTDA - SP
-Botafogo-SP,BOTAFOGO F SA - SP
-Ituano,ITUANO FC - SP
-Juventus-SP,CA JUVENTUS - SP
-São Bento,EC SÃO BENTO - SP
-São José,SÃO JOSÉ EC SAF - SP
-Santo André,EC SANTO ANDRÉ - SP
-XV de Piracicaba,EC XV DE PIRACICABA - SP
-Nacional-SP,NACIONAL AC - SP
-Inter de Limeira,AA INTER LIMEIRA - SP
-Francana,AA FRANCANA - SP
-Comercial-SP,COMERCIAL FC - RP - SP
-Araçatuba,ARAÇATUBA FC - SP
-Taubaté,EC TAUBATÉ - SP
-Oeste,OESTE FC - SP
+ECUS,ECUS - SP
+EC São Bernardo,EC SÃO BERNARDO - SP
+Desportivo Brasil,DESPORTIVO BRASIL - SP
+Corinthians,CORINTHIANS - SP | SC CORINTHIANS PTA - SP
+Comercial-SP,COMERCIAL - SP | COMERCIAL FC - RP - SP
+Colorado Caieiras,COLORADO CAIEIRAS - SP
+Catanduva,CATANDUVA - SP
+Capivariano,CAPIVARIANO - SP | CAPIVARIANO FC SAF - SP
+Botafogo-SP,BOTAFOGO - SP | BOTAFOGO F SA - SP
+Batatais,BATATAIS FC - SP
+Barretos,BARRETOS - SP
+Barcelona-SP,BARCELONA - SP
+Bandeirante,BANDEIRANTE - SP
+Audax,AUDAX - SP | GO AUDAX EC - SP
+Assisense,ASSISENSE - SP
+Araçatuba,ARAÇATUBA - SP | ARAÇATUBA FC - SP
+América-SP,AMÉRICA FC - SP - SP | AMÉRICA FC - SP
+Água Santa,ÁGUA SANTA - SP | EC ÁGUA SANTA - SP
+Flamengo-SP,AA FLAMENGO - SP
+XV de Piracicaba,XV DE PIRACICABA - SP | EC XV DE PIRACICABA - SP
+XV de Jaú,XV DE JAÚ - SP | EC XV DE JAÚ - SP
+Votuporanguense,VOTUPORANGUENSE - SP
+Votoraty,VOTORATY - SP
+Vocem,VOCEM - SP
+Velo Clube,VELO CLUBE - SP | AE VELO CLUBE - SP
+USAC,USAC - SP
+União São João,UNIÃO SÃO JOÃO - SP
+União Mogi,UNIÃO MOGI - SP - SP | UNIÃO MOGI - SP
+União Barbarense,UNIÃO BARBARENSE - SP
+Tupã,TUPÃ - SP
+Taubaté,TAUBATÉ - SP | EC TAUBATÉ - SP
+Taquaritinga,TAQUARITINGA - SP
 Tanabi,TANABI SAF - SP
-Guaratinguetá,ATLÉTICO GUARATINGUETÁ - SP | ATLÉTICO GUARATINGUETÁ SAF - SP
-Ferroviária,FERROVIÁRIA SAF - SP
-Mirassol,MIRASSOL FC - SP
-Novorizontino,GRÊMIO NOVORIZONTINO - SP
-Água Santa,EC ÁGUA SANTA - SP
-Noroeste,EC NOROESTE SAF - SP
-XV de Jaú,EC XV DE JAÚ - SP
-Velo Clube,AE VELO CLUBE - SP
-Linense,CA LINENSE - SP
-Capivariano,CAPIVARIANO FC SAF - SP
-União Mogi,UNIÃO MOGI - SP
-Audax,GO AUDAX EC - SP
-América-SP,AMÉRICA FC - SP
-Fluminense,FLUMINENSE FC - RJ
-Vasco da Gama,VASCO DA GAMA SAF - RJ
-Botafogo,SAF BOTAFOGO - RJ
-Bangu,BANGU AC - RJ
-América-RJ,AMÉRICA FC - RJ
-Volta Redonda,VOLTA REDONDA FC - RJ
+Sertãozinho,SERTÃOZINHO - SP
+São Paulo,SÃO PAULO 2 - SP | SÃO PAULO FC - SP(2) | SÃO PAULO FC - SP
+São José,SÃO JOSÉ - SP | SÃO JOSÉ EC SAF - SP
+São Carlos,SÃO CARLOS FC - SP
+São Caetano,SÃO CAETANO - SP
+São Bernardo,SÃO BERNARDO FC - SP
+São Bento,SÃO BENTO - SP | EC SÃO BENTO - SP
+Santos,SANTOS - SP
+Santo André,SANTO ANDRÉ - SP | EC SANTO ANDRÉ - SP
+Santacruzense,SANTACRUZENSE - SP
+Santa Fé,SANTA FÉ FC - SP
+Riopretano,RIOPRETANO - SP
+Rio Preto,RIO PRETO - SP
+Rio Claro,RIO CLARO - SP
+Rio Branco-SP,RIO BRANCO - SP
+Bragantino,RED BULL BRAGANTINO - SP
+Primavera,PRIMAVERA - SP
+Portuguesa Santista,PORTUGUESA SANTISTA - SP | AA PORTUGUESA - SP
+Portuguesa,PORTUGUESA - SP | PORTUGUESA SAF - SP
+Ponte Preta,PONTE PRETA - SP | AA PONTE PRETA - SP
+Penapolense,PENAPOLENSE - SP
+Paulista,PAULISTA DE JUNDIAÍ - SP
+Paulínia,PAULÍNIA UNIVERSITÁRIO - SP - SP
+Paulinense,PAULINENSE - SP
+Palmeiras,PALMEIRAS - SP | SE PALMEIRAS - SP
+Osasco Sporting,OSASCO SPORTING - SP
+Olímpia,OLIMPIA - SP
+Novorizontino,NOVORIZONTINO - SP | GRÊMIO NOVORIZONTINO - SP
+Noroeste,NOROESTE - SP | EC NOROESTE SAF - SP
+Nacional-SP,NACIONAL - SP | NACIONAL AC - SP
+Monte Azul,MONTE AZUL - SP
+Mogi Mirim,MOGI MIRIM - SP
+Mirassol,MIRASSOL - SP | MIRASSOL FC - SP
+Mauaense,MAUAENSE - SP
+Mauá,MAUÁ - SP
+Matonense,MATONENSE - SP
+Marília,MARILIA - SP
+Manthiqueira,MANTHIQUEIRA - SP
+Linense,LINENSE - SP | CA LINENSE - SP
+Lemense,LEMENSE - SP
+Juventus-SP,JUVENTUS - SP | CA JUVENTUS - SP
+Joseense,JOSEENSE - SP
+José Bonifácio,JOSÉ BONIFÁCIO - SP
+Jacareí,JACAREÍ - SP
+Jabaquara,JABAQUARA - SP
+Ituano,ITUANO - SP | ITUANO FC - SP
+Itaquaquecetuba,ITAQUAQUECETUBA ATH - SP - SP
+Itapirense,ITAPIRENSE - SP
+Inter de Limeira,INTER DE LIMEIRA - SP | AA INTER LIMEIRA - SP
+Inter de Bebedouro,INTER DE BEBEDOURO - SP
+Independente-SP,INDEPENDENTE - SP
+Guarulhos,GUARULHOS - SP
+Guarani,GUARANI FC - SP
+Grêmio Sãocarlense,GRÊMIO SÃO CARLENSE - SP
+Grêmio Prudente,GRÊMIO PRUDENTE - SP
+Catanduvense,GRÊMIO CATANDUVENSE - SP
+Francana,FRANCANA - SP | AA FRANCANA - SP
+Ferroviária,FERROVIÁRIA - SP | FERROVIÁRIA SAF - SP
 América Mineiro,AMÉRICA FC SAF - MG
 América de Natal,AMÉRICA FC SAF - RN
-Atlético Mineiro,ATLÉTICO MINEIRO SAF - MG | ATLÉTICO MINEIRO - MG
-Cruzeiro,CRUZEIRO EC SAF - MG
+América-RJ,AMÉRICA FC - RJ
 Athletico Paranaense,ATHLETICO PARANAENSE - PR | ATHLETICO PARANAENSE SAF - PR
+Atlético Mineiro,ATLÉTICO MINEIRO SAF - MG | ATLÉTICO MINEIRO - MG
+Bahia,EC BAHIA SAF - BA
+Bangu,BANGU AC - RJ
+Botafogo,SAF BOTAFOGO - RJ
+Brasiliense,BRASILIENSE SAF - DF
+CSA,CSA - AL
+Ceará,CEARÁ SC - CE
+Chapecoense,A CHAPECOENSE - SC
 Coritiba,CORITIBA FC SAF - PR
-Operário,OPERÁRIO FERROVIÁRIO EC - PR | OPERÁRIO FERROVIÁRIO EC SAF - PR
+Criciúma,CRICIÚMA EC - SC
+Cruzeiro,CRUZEIRO EC SAF - MG
+Cuiabá,CUIABÁ EC SAF - MT
+Ferroviário,FERROVIÁRIO AC - CE
+Figueirense,FIGUEIRENSE FC SAF - SC
+Fluminense,FLUMINENSE FC - RJ
+Fortaleza,FORTALEZA EC - CE
+Goiás,GOIÁS EC - GO
 Grêmio,GRÊMIO FBPA - RS
+Guaratinguetá,ATLÉTICO GUARATINGUETÁ - SP | ATLÉTICO GUARATINGUETÁ SAF - SP
 Internacional,SC INTERNACIONAL - RS
 Juventude,EC JUVENTUDE - RS
-Figueirense,FIGUEIRENSE FC SAF - SC
-Chapecoense,A CHAPECOENSE - SC
-Criciúma,CRICIÚMA EC - SC
-Bahia,EC BAHIA SAF - BA
-Vitória,EC VITÓRIA SAF - BA
+Náutico,NÁUTICO CAPIBARIBE - PE
+Oeste,OESTE FC - SP
+Operário,OPERÁRIO FERROVIÁRIO EC - PR | OPERÁRIO FERROVIÁRIO EC SAF - PR
+Remo,CLUBE DO REMO - PA
+Retrô,RETRÔ FC - PE
 Santa Cruz,SANTA CRUZ FC - PE
 Sport,SPORT RECIFE - PE
-Náutico,NÁUTICO CAPIBARIBE - PE
-Retrô,RETRÔ FC - PE
-Ceará,CEARÁ SC - CE
-Fortaleza,FORTALEZA EC - CE
-Ferroviário,FERROVIÁRIO AC - CE
-Goiás,GOIÁS EC - GO
-Vila Nova,VILA NOVA FC - GO
-Brasiliense,BRASILIENSE SAF - DF
-Cuiabá,CUIABÁ EC SAF - MT
-Remo,CLUBE DO REMO - PA
 Tuna Luso,TUNA LUSO BRASILEIRA - PA
-CSA,CSA - AL
+Vasco da Gama,VASCO DA GAMA SAF - RJ
+Vila Nova,VILA NOVA FC - GO
+Vitória,EC VITÓRIA SAF - BA
+Volta Redonda,VOLTA REDONDA FC - RJ
