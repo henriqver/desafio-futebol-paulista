@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Conferência — Desafio Futebol Paulista</title>
+<link rel="stylesheet" href="fontes/fontes.css">
+<style>
+:root{--bg:#EEF2EC; --surface:#fff; --text:#13241B; --muted:#5B6B61; --line:#D3DCD5; --ok:#067647; --falta:#B42318; --accent:#0E4D33; color-scheme:light}
+@media (prefers-color-scheme: dark){ :root{--bg:#08140E; --surface:#10241A; --text:#EAF1EC; --muted:#9DB0A4; --line:#24402F; --ok:#3DD68C; --falta:#F97066; --accent:#FFC233; color-scheme:dark} }
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--text); font:15px/1.5 "Barlow",system-ui,sans-serif}
+main{max-width:980px; margin:0 auto; padding:24px 16px 48px}
+h1,h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif; margin:0 0 8px}
+h1{font-size:36px} h2{font-size:26px; margin-top:28px}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:16px 0}
+.kpi{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px}
+.kpi b{display:block; font:800 30px "Barlow Condensed",sans-serif}
+.kpi span{color:var(--muted); font-size:13px}
+.box{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:4px 14px; overflow-x:auto}
+table{width:100%; border-collapse:collapse; font-size:14px}
+th,td{text-align:left; padding:7px 6px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-weight:700; color:var(--muted)}
+td code{font-size:13px}
+.ok{color:var(--ok); font-weight:700} .falta{color:var(--falta); font-weight:700}
+ul{margin:8px 0; padding-left:20px} li{margin:4px 0}
+.barra{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:6px 0 10px}
+button{font:700 16px "Barlow Condensed",sans-serif; background:var(--accent); color:var(--bg); border:0; border-radius:10px; padding:8px 14px; cursor:pointer}
+select{font:inherit; padding:6px; border-radius:8px; border:1px solid var(--line); background:var(--surface); color:var(--text)}
+.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Conferência dos dados</h1>
+  <p class="muted" id="estado">Lendo os arquivos…</p>
+  <div class="kpis" id="kpis"></div>
+  <section id="problemas"></section>
+  <section id="escudos"></section>
+  <section id="fotos"></section>
+</main>
+<script src="js/dados.js"></script>
+<script>
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function baixarCSV(nome, linhas){
+  const txt='\uFEFF'+linhas.map(l=>l.map(v=>/[",\n]/.test(v)?`"${String(v).replace(/"/g,'""')}"`:v).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv'})); a.download=nome; a.click();
+}
+function tabela(id, titulo, itens, tipo){
+  const sec=document.getElementById(id);
+  const arquivo = n => urlImagem(tipo+':'+slug(n)).split('/').map(decodeURIComponent).join('/');
+  sec.innerHTML=`<h2>${titulo}</h2>
+    <div class="barra"><select><option value="todos">Todos</option><option value="falta">Só os que faltam</option><option value="ok">Só os encontrados</option></select>
+    <button type="button">Baixar lista (CSV)</button><span class="muted"></span></div>
+    <div class="box"><table><thead><tr><th>Nome</th><th>Arquivo esperado</th><th>Status</th><th>Uso</th></tr></thead><tbody></tbody></table></div>`;
+  const tb=sec.querySelector('tbody'), sel=sec.querySelector('select'), info=sec.querySelector('.barra span');
+  const linhas=itens.map(it=>({...it, arq:arquivo(it.nome), st:null}));
+  const desenhar=()=>{ const f=sel.value;
+    tb.innerHTML=linhas.filter(l=>f==='todos'||(f==='ok'?l.st===true:l.st===false)).map(l=>`<tr><td>${esc(l.nome)}</td><td><code>${esc(l.arq)}</code></td>
+      <td class="${l.st===true?'ok':l.st===false?'falta':''}">${l.st===true?'Encontrado':l.st===false?'Faltando':'…'}</td><td>${esc(l.uso)}</td></tr>`).join('');
+    const ok=linhas.filter(l=>l.st===true).length; info.textContent=`${ok} de ${linhas.length} encontrados`; };
+  sel.onchange=desenhar;
+  sec.querySelector('button').onclick=()=>baixarCSV(`${id}.csv`,[['Nome','Arquivo esperado','Status','Uso'],...linhas.map(l=>[l.nome,l.arq,l.st?'Encontrado':'Faltando',l.uso])]);
+  desenhar();
+  Promise.all(linhas.map(async l=>{ l.st=await existe(tipo+':'+slug(l.nome)) })).then(desenhar);
+  let t=setInterval(desenhar,1500); setTimeout(()=>clearInterval(t),12000);
+}
+carregarDados().then(()=>{
+  document.getElementById('estado').textContent='Arquivos lidos: '+[CONFIG.jogadores,CONFIG.quiz,CONFIG.ranking,CONFIG.escudos].join(' · ');
+  const J=DB.jogadores, carreira=J.filter(j=>j.carreiraOk&&j.carreira.length<=8);
+  const longas=J.filter(j=>j.carreiraOk&&j.carreira.length>8), semCarreira=J.filter(j=>!j.carreira.length);
+  const nRank=Object.values(RANKING_FIXO).reduce((a,l)=>a+l.length,0);
+  document.getElementById('kpis').innerHTML=[[J.length,'jogadores'],[carreira.length,'no desafio Carreira'],[DB.porClube.size,'times paulistas'],[DB.quiz.length,'perguntas do quiz'],[nRank,'participantes no ranking'],[DB.problemas.length,'problemas nos dados']]
+    .map(([n,t])=>`<div class="kpi"><b>${n}</b><span>${t}</span></div>`).join('');
+  const clubesSP=[...DB.porClube.entries()].sort((a,b)=>b[1].length-a[1].length).map(([c,l])=>`${c} (${l.length})`);
+  document.getElementById('problemas').innerHTML=`<h2>Pontos de atenção</h2><div class="box"><ul>
+    ${DB.problemas.map(p=>`<li>${esc(p)}</li>`).join('')}
+    <li>${semCarreira.length} jogadores sem "Todos os Times da Carreira": ficam fora do desafio Carreira, mas participam dos demais.</li>
+    ${longas.length?`<li>${longas.length} carreiras com mais de 8 clubes ficam fora do desafio Carreira, por não caberem na tela: ${esc(longas.map(j=>j.nome).join(', '))}.</li>`:''}
+    <li>Times paulistas encontrados (nº de jogadores): ${esc(clubesSP.join(' · '))}.</li></ul></div>`;
+  const usoClube=new Map();
+  J.forEach(j=>{ j.paulistas.forEach(c=>usoClube.set(c,'Paulista')); j.carreira.forEach(c=>{ if(!usoClube.has(c)) usoClube.set(c,'Carreira') }) });
+  const clubes=[...usoClube.entries()].sort((a,b)=>a[1].localeCompare(b[1],'pt')*-1||a[0].localeCompare(b[0],'pt')).map(([nome,uso])=>({nome,uso:uso==='Paulista'?'Time paulista':'Só na carreira'}));
+  tabela('escudos','Escudos',clubes,'clube');
+  tabela('fotos','Fotos dos jogadores',[...J].sort((a,b)=>a.nome.localeCompare(b.nome,'pt')).map(j=>({nome:j.nome,uso:j.paulistas.join(', ')})),'jogador');
+}).catch(e=>{ document.getElementById('estado').textContent=e.message+'. Abra esta página pelo endereço do site (ou por um servidor local).' });
+</script>
+</body>
+</html>

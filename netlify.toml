@@ -1,0 +1,15 @@
+# Site estático: não há etapa de build.
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Permissions-Policy = "camera=(self), microphone=(self), web-share=(self)"
+    X-Content-Type-Options = "nosniff"
+
+# Os CSV sempre na versão mais recente
+[[headers]]
+  for = "/dados/*"
+  [headers.values]
+    Cache-Control = "no-cache"
