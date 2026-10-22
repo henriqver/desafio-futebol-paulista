@@ -107,7 +107,7 @@ video.preview{width:100%; border-radius:18px; background:#000; aspect-ratio:9/16
 <body>
 <div class="app" id="app"></div>
 <div class="sr" aria-live="polite" id="sr"></div>
-<script src="js/dados.js?v=2026-10-23"></script>
+<script src="js/dados.js?v=2026-10-24"></script>
 <script>
 
 /* =========================================================
@@ -175,16 +175,38 @@ const artigo = c => ARTIGO_NA.includes(c)?'na':'no';
 const POOL = {escudo:null, silhueta:null};
 const poolCarreira = () => DB.jogadores.filter(j=>j.carreiraOk&&j.carreira.length<=8);
 function combinacoes(clubes,k){ const out=[]; const rec=(ini,ac)=>{ if(ac.length===k){out.push(ac.slice()); return} for(let i=ini;i<clubes.length;i++){ac.push(clubes[i]); rec(i+1,ac); ac.pop()} }; rec(0,[]); return out }
+/* Jogou em todos: um time paulista + outro time qualquer da carreira do jogador.
+   As erradas jogaram no time paulista (e não no outro) e, de preferência, em clubes do mesmo país/região do outro time. */
 function rodadasDois(){
-  const clubes=[...DB.porClube.keys()]; const cands={2:[],3:[]};
-  [2,3].forEach(k=>combinacoes(clubes,k).forEach(cs=>{
-    const todos=DB.jogadores.filter(j=>cs.every(c=>j.paulistas.includes(c)));
-    const parcial=DB.jogadores.filter(j=>cs.some(c=>j.paulistas.includes(c))&&!cs.every(c=>j.paulistas.includes(c)));
-    if(todos.length&&parcial.length>=3) cands[k].push({cs,todos,parcial});
-  }));
-  const esc=[...shuffle(cands[3]).slice(0,3), ...shuffle(cands[2])].slice(0,10);
-  return shuffle(esc).map(({cs,todos,parcial})=>{ const certa=shuffle(todos)[0].nome;
-    return {prompt:'Quem jogou em '+(cs.length>2?'todos?':'ambos?'), badges:cs, seq:false, opcoes:shuffle([certa,...outros(parcial.map(j=>j.nome),certa)]), avatares:true, certa, respKey:'jogador:'+slug(certa), fala:'Quem jogou em '+cs.slice(0,-1).map(pronuncia).join(', ')+' e '+pronuncia(cs.at(-1))+'?', falaSeg:['Quem jogou em',...cs.slice(0,-1),'e',cs.at(-1)]} });
+  const base=DB.jogadores.filter(j=>j.paulistas.length&&j.carreira.length>=2);
+  const freq=new Map(); DB.jogadores.forEach(j=>clubesDe(j).forEach(c=>freq.set(c,(freq.get(c)||0)+1)));
+  const usados=new Set(), out=[];
+  for(let t=0;t<600&&out.length<10;t++){
+    const j=base[Math.random()*base.length|0], A=j.paulistas[Math.random()*j.paulistas.length|0];
+    const Bs=[...new Set(j.carreira)].filter(c=>c!==A&&(freq.get(c)||0)>=2); if(!Bs.length) continue;
+    const B=Bs[Math.random()*Bs.length|0], chave=[A,B].sort().join('|'); if(usados.has(chave)) continue;
+    const cand=DB.jogadores.filter(d=>d!==j&&jogouEm(d,A)&&naoJogouEm(d,B))
+      .map(d=>({nome:d.nome, s:Math.max(0,...clubesDe(d).filter(c=>c!==A).map(c=>simClube(c,B)))+Math.random()*.9}));
+    if(cand.length<3) continue;
+    cand.sort((a,b)=>b.s-a.s); usados.add(chave);
+    const cs=Math.random()<.5?[A,B]:[B,A];
+    out.push({cs, certa:j.nome, erradas:cand.slice(0,3).map(x=>x.nome)});
+  }
+  return out.map(({cs,certa,erradas})=>({prompt:'Quem jogou em ambos?', badges:cs, seq:false, opcoes:shuffle([certa,...erradas]), avatares:true, certa, respKey:'jogador:'+slug(certa),
+    fala:'Quem jogou em '+pronuncia(cs[0])+' e '+pronuncia(cs[1])+'?', falaSeg:['Quem jogou em',cs[0],'e',cs[1]],
+    falaCurta:pronuncia(cs[0])+' e '+pronuncia(cs[1]), falaSegCurta:[cs[0],'e',cs[1]]}));
+}
+/* alternativas parecidas: quem passou pelos mesmos clubes (ou por clubes do mesmo país/região) */
+function parecidos(j,pool,n=3,uso=new Map()){
+  const cj=clubesDe(j);
+  const sc=pool.filter(d=>d!==j&&d.nome!==j.nome).map(d=>{ let s=0;
+    clubesDe(d).forEach(c=>{ s += cj.includes(c) ? 3 : Math.max(0,...cj.map(x=>simClube(c,x)))*.3 });
+    /* divide pela raiz do nº de clubes para não favorecer sempre quem rodou muito */
+    return {nome:d.nome, s:s/Math.sqrt(Math.max(1,clubesDe(d).length))*2+Math.random()*1.2-(uso.get(d.nome)||0)*2.5} });
+  sc.sort((a,b)=>b.s-a.s);
+  const esc=shuffle(sc.slice(0,7)).slice(0,n).map(x=>x.nome);
+  esc.forEach(nm=>uso.set(nm,(uso.get(nm)||0)+1));  /* evita repetir as mesmas alternativas na partida */
+  return esc;
 }
 function rodadasIntruso(){
   const clubes=shuffle([...DB.porClube.entries()].filter(([,l])=>l.length>=5).map(([c])=>c));
@@ -193,7 +215,7 @@ function rodadasIntruso(){
     const c=clubes[i%clubes.length], jogaram=shuffle(DB.porClube.get(c)).slice(0,5).map(j=>j.nome);
     const fora=DB.jogadores.filter(j=>!j.paulistas.includes(c)), parecidos=fora.filter(j=>j.paulistas.some(p=>GRANDES.includes(p)));
     const intr=shuffle(parecidos.length?parecidos:fora)[0].nome;
-    return {prompt:`Quem nunca jogou ${artigo(c)} ${c}?`, clube:c, opcoes:shuffle([...jogaram,intr]), avatares:true, certa:intr, fala:`Quem nunca jogou ${artigo(c)} ${pronuncia(c)}?`, falaSeg:[`Quem nunca jogou ${artigo(c)}`, c]};
+    return {prompt:`Quem nunca jogou ${artigo(c)} ${c}?`, clube:c, opcoes:shuffle([...jogaram,intr]), avatares:true, certa:intr, fala:`Quem nunca jogou ${artigo(c)} ${pronuncia(c)}?`, falaSeg:[`Quem nunca jogou ${artigo(c)}`, c], falaCurta:pronuncia(c), falaSegCurta:[c]};
   });
 }
 async function prepararPool(id){
@@ -211,13 +233,13 @@ async function prepararPool(id){
   return POOL[id];
 }
 function montarRodadas(id){
-  if(id==='carreira'){ const pool=poolCarreira(), nomes=pool.map(j=>j.nome);
-    return shuffle(pool).slice(0,10).map(j=>({prompt:'Quem é o jogador?', badges:j.carreira, seq:true, opcoes:shuffle([j.nome,...outros(nomes,j.nome)]), avatares:true, certa:j.nome, respKey:'jogador:'+slug(j.nome), fala:'Quem é o jogador? '+j.carreira.map(pronuncia).join(', '), falaSeg:['Quem é o jogador?',...j.carreira]})) }
+  if(id==='carreira'){ const pool=poolCarreira(), uso=new Map();
+    return shuffle(pool).slice(0,10).map(j=>({prompt:'Quem é o jogador?', badges:j.carreira, seq:true, opcoes:shuffle([j.nome,...parecidos(j,DB.jogadores,3,uso)]), avatares:true, certa:j.nome, respKey:'jogador:'+slug(j.nome), fala:'Quem é o jogador? '+j.carreira.map(pronuncia).join(', '), falaSeg:['Quem é o jogador?',...j.carreira], falaCurta:j.carreira.map(pronuncia).join(', '), falaSegCurta:[...j.carreira]})) }
   if(id==='dois-clubes') return rodadasDois();
   if(id==='intruso') return rodadasIntruso();
   if(id==='quiz') return shuffle(DB.quiz).slice(0,10).map(c=>({prompt:c.q, opcoes:shuffle(c.opcoes), certa:c.certa, fala:c.q, falaSeg:[c.q]}));
-  if(id==='escudo'){ const P=POOL.escudo||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'De qual clube é este escudo?', imgKey:'clube:'+slug(n), generico:'escudo', opcoes:shuffle([n,...outros(P,n)]), certa:n, respKey:'clube:'+slug(n), fala:'De qual clube é este escudo?', falaSeg:['De qual clube é este escudo?']})) }
-  if(id==='silhueta'){ const P=POOL.silhueta||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'Quem é este jogador?', imgKey:'jogador:'+slug(n), generico:'jogador', opcoes:shuffle([n,...outros(P,n)]), avatares:false, certa:n, respKey:'jogador:'+slug(n), fala:'Quem é este jogador?', falaSeg:['Quem é este jogador?']})) }
+  if(id==='escudo'){ const P=POOL.escudo||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'De qual clube é este escudo?', imgKey:'clube:'+slug(n), generico:'escudo', opcoes:shuffle([n,...outros(P,n)]), certa:n, respKey:'clube:'+slug(n), fala:'De qual clube é este escudo?', falaSeg:['De qual clube é este escudo?'], falaCurta:'', falaSegCurta:[]})) }
+  if(id==='silhueta'){ const P=POOL.silhueta||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'Quem é este jogador?', imgKey:'jogador:'+slug(n), generico:'jogador', opcoes:shuffle([n,...outros(P,n)]), avatares:false, certa:n, respKey:'jogador:'+slug(n), fala:'Quem é este jogador?', falaSeg:['Quem é este jogador?'], falaCurta:'', falaSegCurta:[]})) }
   return [];
 }
 
@@ -413,7 +435,11 @@ async function iniciar(comCamera){
 function novaRodada(){
   S.tentativa=1; S.desabilitadas=[]; S.fb=null; S.leaveAt=0; S.enterAt=performance.now(); S.layout=calcularLayout(S.rodadas[S.i]);
   posicionarOverlays(); SFX.whoosh(); ligarRelogio();
-  const r=S.rodadas[S.i]; sr.textContent=`Rodada ${S.i+1}. ${r.fala}`; falar(r.fala, r.falaSeg);
+  const r=S.rodadas[S.i]; sr.textContent=`Rodada ${S.i+1}. ${r.fala}`;
+  /* o enunciado do jogo só é lido na primeira rodada; nas demais, apenas o conteúdo (clubes, pergunta do quiz) */
+  const curta = S.i>0 && r.falaCurta!==undefined;
+  const texto = curta ? r.falaCurta : r.fala, seg = curta ? r.falaSegCurta : r.falaSeg;
+  if(texto) falar(texto, seg); else { NARR.id++; pararFala() }
 }
 function ligarRelogio(){
   S.pausado=false; S.congelado=null; S.fim=performance.now()+S.game.tempo*1000; S.ultimoTick=null;
