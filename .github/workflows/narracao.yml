@@ -19,9 +19,12 @@ jobs:
         with:
           python-version: "3.12"
       - name: Gerar áudios
-        env:
-          AZURE_TTS_KEY: ${{ secrets.AZURE_TTS_KEY }}
-          AZURE_TTS_REGION: ${{ secrets.AZURE_TTS_REGION }}
+           env:
+             ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+             ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
+             AZURE_TTS_KEY: ${{ secrets.AZURE_TTS_KEY }}
+             AZURE_TTS_REGION: ${{ secrets.AZURE_TTS_REGION }}
+             NARRACAO_LIMITE_CARACTERES: ${{ vars.NARRACAO_LIMITE_CARACTERES }}
         run: python ferramentas/gerar_narracao.py
       - name: Salvar no repositório
         run: |
