@@ -15,7 +15,8 @@ const CONFIG = {
 };
 /* como a voz do navegador deve pronunciar alguns nomes (a narração gravada usa a mesma lista) */
 const PRONUNCIA = {'Botafogo-SP':'Botafogo de Ribeirão Preto','Juventus-SP':'Juventus da Mooca','Nacional-SP':'Nacional','Comercial-SP':'Comercial',
-  'River Plate (URU)':'River Plate','Universidad Católica (EQU)':'Universidad Católica','PSV':'P S V','CSKA Moscou':'CSKA de Moscou'};
+  'River Plate (URU)':'River Plate','Universidad Católica (EQU)':'Universidad Católica','PSV':'P S V','CSKA Moscou':'CSKA de Moscou',
+  'Barcelona-SP':'Barcelona','Flamengo-SP':'Flamengo de Guarulhos','América-SP':'América de Rio Preto','Rio Branco-SP':'Rio Branco de Americana','Independente-SP':'Independente de Limeira','ECUS':'E C U S','USAC':'U S A C'};
 const pronuncia = t => PRONUNCIA[t]||t;
 /* grafias diferentes do mesmo clube na coluna de times paulistas */
 const ALIAS_CLUBE = {'S. Caetano':'São Caetano', 'Sao Paulo':'São Paulo', 'Red Bull Bragantino':'Bragantino'};
