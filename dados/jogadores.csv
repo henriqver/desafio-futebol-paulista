@@ -1,25 +1,25 @@
 ﻿Jogador,Times Paulistas que Passou,Todos os Times da Carreira
 Ademir da Guia,Palmeiras,"Bangu, Palmeiras"
-Agustín Giay,Palmeiras,
+Agustín Giay,Palmeiras,"San Lorenzo, Palmeiras"
 Alberto,Santos,"Fluminense, Santos, Botafogo, Flamengo, New York Cosmos, California Surf"
 Alex,"Palmeiras, Santos",
-Alex Sandro,Santos,
+Alex Sandro,Santos,"Athletico Paranaense, Santos, Porto, Juventus, Flamengo"
 Alexander Barboza,Palmeiras,
 Alison,Santos,
 Allan,Corinthians,"Internacional, Sint-Truiden, Apollon Limassol, Eintracht Frankfurt, Hertha BSC, Napoli, Everton, Al Wahda, Botafogo, Flamengo, Corinthians"
 Aloísio Chulapa,São Paulo,"CRB, Flamengo, Guarani, Goiás, Saint-Étienne, Paris Saint-Germain, Rubin Kazan, Athletico Paranaense, São Paulo, Al-Rayyan, Vasco da Gama, Ceará, Brasiliense, CRB, Brusque, Francana, Gama, Santa Sete, Atalaia, Ipanema, Comercial-MS, Nova Conquista, Grêmio Maringá"
 Alvaro Pereira,São Paulo,
-Amoroso,São Paulo,
+Amoroso,"Corinthians, Guarani, São Paulo","Guarani, Udinese, Parma, Borussia Dortmund, Málaga, São Paulo, Milan, Corinthians, Grêmio"
 Anderson Polga,Corinthians,"Grêmio, Sporting CP, Corinthians"
 Andreas Pereira,Palmeiras,"Manchester United, Granada, Valencia, Lazio, Flamengo, Fulham, Palmeiras"
 André Carrillo,Corinthians,"Alianza Lima, Sporting CP, Benfica, Watford, Al Hilal, Al Qadsiah, Corinthians"
-André Ramalho,Corinthians,
+André Ramalho,"Bragantino, Corinthians","Bragantino, Red Bull Salzburg, Bayer Leverkusen, Mainz, Red Bull Salzburg, PSV, Corinthians"
 Antoninho,Santos,
 Antonio Sastre,São Paulo,"Independiente, São Paulo, Gimnasia de La Plata"
-Antony,São Paulo,
+Antony,São Paulo,"São Paulo, Ajax, Manchester United, Real Betis"
 Araken Patusca,Santos,"Santos, Paulistano, Santos, Flamengo, Santos, São Paulo, Santos"
-Arce,Palmeiras,"Flamengo, Corinthians, Valencia, Vasco da Gama, Santos, Gamba Osaka, Al-Nassr, Ajaccio, Brasiliense, Santo André"
-Arouca,Santos,
+Arce,Palmeiras,
+Arouca,"Palmeiras, Santos, São Paulo","Fluminense, São Paulo, Santos, Palmeiras, Atlético Mineiro"
 Arthur Melo,Santos,"Grêmio, Barcelona, Juventus, Liverpool, Fiorentina, Santos"
 Artur,São Paulo,
 Axel,Santos,
@@ -34,11 +34,11 @@ Biro-Biro,Corinthians,
 Borges,Santos,
 Bremer,"Desportivo Brasil, São Paulo","Desportivo Brasil, São Paulo, Atlético Mineiro, Torino, Juventus"
 Breno Bidon,Corinthians,Corinthians
-Bryan Ruiz,Santos,
+Bryan Ruiz,Santos,"Alajuelense, Gent, Twente, Fulham, PSV, Sporting, Santos, Alajuelense"
 Cafu,"Palmeiras, São Paulo","São Paulo, Zaragoza, Juventude, Palmeiras, Roma, Milan"
 Canhoteiro,São Paulo,
 Careca,"Guarani, Santos, São Paulo","Guarani, São Paulo, Napoli, Yokohama Flügels, Santos, Campinas, São José"
-Carlos,"Corinthians, Palmeiras, Ponte Preta","Fluminense, Santos, Botafogo, Flamengo, New York Cosmos, California Surf"
+Carlos,"Corinthians, Palmeiras, Ponte Preta",
 Carlos Alberto Torres,Santos,"Fluminense, Santos, Botafogo, Flamengo, New York Cosmos, California Surf"
 Carlos Coronel,São Paulo,"Red Bull Brasil, Red Bull Salzburg, Liefering, Philadelphia Union, New York Red Bulls, São Paulo"
 Carlos Gamarra,"Corinthians, Palmeiras","Cerro Porteño, Independiente, Cerro Porteño, Internacional, Benfica, Corinthians, Atlético Madrid, Flamengo, AEK Atenas, Internazionale, Palmeiras, Olimpia"
@@ -47,37 +47,38 @@ Carlos Sánchez,Santos,
 Carlos Tévez,Corinthians,"Boca Juniors, Corinthians, West Ham United, Manchester United, Manchester City, Juventus, Shanghai Shenhua, Boca Juniors"
 Casagrande,"Corinthians, Paulista, São Paulo",
 Casemiro,São Paulo,"São Paulo, Real Madrid, Porto, Manchester United, Inter Miami"
-Cauly,São Paulo,
+Cauly,São Paulo,"MSV Duisburg, Paderborn, Bahia, São Paulo"
 Charles,Corinthians,
 Chicão,Corinthians,
 Chinesinho,Palmeiras,
 Christian Cueva,"Santos, São Paulo","Universidad San Martín, Universidad César Vallejo, Unión Española, Rayo Vallecano, Alianza Lima, Toluca, São Paulo, Krasnodar, Santos, Pachuca, Yeni Malatyaspor, Al-Fateh, Alianza Lima, Cienciano"
-Cicinho,"Botafogo-SP, São Paulo",
+Cicinho,"Botafogo-SP, São Paulo","Botafogo-SP, Atlético Mineiro, São Paulo, Real Madrid, Roma"
 Clemente Rodríguez,São Paulo,
 Clodoaldo,Santos,"Santos, Tampa Bay Rowdies, Nacional-AM"
 Cláudio,Corinthians,"Santos, Palmeiras, Corinthians, São Paulo"
 Cléber,Palmeiras,
 Coutinho,Santos,"Santos, Vitória, Portuguesa, Atlas, Bangu, Saad"
-Cássio,Corinthians,
+Cássio,Corinthians,"Grêmio, PSV, Sparta Rotterdam, Corinthians, Cruzeiro"
 César Maluco,Palmeiras,
 César Sampaio,"Corinthians, Palmeiras, Santos, São Paulo","Santos, Palmeiras, Yokohama Flügels, Deportivo La Coruña, Corinthians, São Paulo, Sanfrecce Hiroshima, Persisam Putra"
-Damián Bobadilla,São Paulo,
-Danilo,"Corinthians, Santos","América Mineiro, Santos, Porto, Real Madrid, Manchester City, Juventus, Botafogo"
+Damián Bobadilla,São Paulo,"Cerro Porteño, São Paulo"
+Danilo,"Corinthians, São Paulo","Goiás, São Paulo, Kashima Antlers, Corinthians"
+Danilo Luiz,Santos,"América Mineiro, Santos, Porto, Real Madrid, Manchester City, Juventus, Botafogo"
 Darío Pereyra,São Paulo,"Nacional, São Paulo, Flamengo, Palmeiras, Matsushita Electric"
-De Sordi,São Paulo,
-Deco,"Corinthians, Nacional-SP",
+De Sordi,"São Paulo, XV de Piracicaba","XV de Piracicaba, São Paulo"
+Deco,"Corinthians, Nacional-SP","Nacional-SP, Corinthians, Alverca, Salgueiros, Porto, Barcelona, Chelsea, Fluminense"
 Dentinho,Corinthians,
 Denílson,"Palmeiras, São Paulo","São Paulo, Real Betis, Flamengo, Bordeaux, Al-Nassr, FC Dallas, Palmeiras, Itumbiara, Hai Phong, Kavala"
 Dida,"Corinthians, Portuguesa","Vitória, Cruzeiro, Lugano, Corinthians, Milan, Portuguesa, Grêmio, Internacional"
-Diego,Santos,"Nacional, Plaza Colonia, São Paulo, Fenerbahçe, Paris Saint-Germain, Málaga, West Bromwich Albion, Häcken, Cerro Porteño, São Paulo"
+Diego,Santos,"Santos, Porto, Werder Bremen, Juventus, Wolfsburg, Atlético de Madrid, Fenerbahçe, Flamengo"
 Diego Lugano,São Paulo,"Nacional, Plaza Colonia, São Paulo, Fenerbahçe, Paris Saint-Germain, Málaga, West Bromwich Albion, Häcken, Cerro Porteño, São Paulo"
 Djalma Santos,Palmeiras,"Portuguesa, Palmeiras, Athletico Paranaense"
 Dodô,Santos,
 Domingos,Santos,
-Domingos da Guia,Corinthians,
+Domingos da Guia,Corinthians,"Bangu, Vasco da Gama, Nacional, Boca Juniors, Flamengo, Corinthians, Bangu"
 Doni,"Botafogo-SP, Corinthians, Santos",
 Dorval,Santos,
-Dudu (Eduardo Pereira),Palmeiras,
+Dudu (Eduardo Pereira),Palmeiras,"Cruzeiro, Dínamo de Kiev, Grêmio, Palmeiras, Al-Duhail, Palmeiras, Cruzeiro, Atlético Mineiro"
 Dudu (Olegário),Palmeiras,
 Dunga,Santos,"Internacional, Corinthians, Santos, Vasco da Gama, Pisa, Fiorentina, Pescara, VfB Stuttgart, Júbilo Iwata, Internacional"
 Durval,Santos,
@@ -97,28 +98,28 @@ Eugenio Mena,"Santos, São Paulo",
 Eurico,Palmeiras,
 Evair,Palmeiras,"Guarani, Atalanta, Palmeiras, Yokohama Flügels, Atlético Mineiro, Vasco da Gama, Portuguesa, Palmeiras, São Paulo, Goiás, Coritiba, Figueirense"
 Everton Cebolinha,Santos,"Grêmio, Benfica, Flamengo, Santos"
-Everton Ribeiro,"Corinthians, São Caetano",
+Everton Ribeiro,"Corinthians, São Caetano","Corinthians, São Caetano, Coritiba, Cruzeiro, Al-Ahli, Flamengo, Bahia"
 Fabinho,Paulínia,
 Fabão,São Paulo,
-Fagner,Corinthians,
+Fagner,Corinthians,"Corinthians, PSV, Vasco da Gama, Wolfsburg, Corinthians, Cruzeiro"
 Falcão,São Paulo,"Internacional, Roma, São Paulo"
 Feitiço,Santos,
 Felipe Anderson,Palmeiras,"Santos, Lazio, West Ham United, Porto, Lazio, Palmeiras"
 Felipe Melo,Palmeiras,"Flamengo, Cruzeiro, Grêmio, Mallorca, Racing Santander, Almería, Fiorentina, Juventus, Galatasaray, Internazionale, Palmeiras, Fluminense"
-Fernando Prass,Palmeiras,
+Fernando Prass,Palmeiras,"Grêmio, Coritiba, União de Leiria, Vasco da Gama, Palmeiras, Ceará"
 Ferreirinha,São Paulo,
-Flaco López,Palmeiras,
+Flaco López,Palmeiras,"Lanús, Palmeiras"
 Francisco Arce,Palmeiras,"Cerro Porteño, Grêmio, Palmeiras, Gamba Osaka, Libertad"
-França,São Paulo,
+França,São Paulo,"São Paulo, Bayer Leverkusen, Kashiwa Reysol"
 Freddy Rincón,"Corinthians, Palmeiras, Santos","Atlético Buenaventura, Deportes Tolima, Independiente Santa Fe, América de Cali, Napoli, Real Madrid, Palmeiras, Corinthians, Santos, Cruzeiro"
 Fábio Costa,Santos,
 Fábio Santos,Corinthians,
-Félix Torres,Corinthians,
+Félix Torres,Corinthians,"Barcelona de Guayaquil, Santos Laguna, Corinthians, Internacional"
 Gabriel Barbosa,Santos,"Santos, Internazionale, Benfica, Flamengo, Santos"
 Gabriel Jesus,Palmeiras,"Palmeiras, Manchester City, Arsenal, Barcelona"
-Gabriel Martinelli,"Corinthians, Ituano",
-Gabriel Menino,Santos,
-Gabriel Paulista,Corinthians,
+Gabriel Martinelli,"Corinthians, Ituano","Ituano, Arsenal"
+Gabriel Menino,Palmeiras,"Palmeiras, Atlético Mineiro"
+Gabriel Paulista,Corinthians,"Vitória, Arsenal, Valencia, Atlético de Madrid, Beşiktaş, Corinthians"
 Galeano,Palmeiras,
 Gamarra,Corinthians,"Cerro Porteño, Independiente, Cerro Porteño, Internacional, Benfica, Corinthians, Atlético Madrid, Flamengo, AEK Atenas, Internazionale, Palmeiras, Olimpia"
 Gil,Corinthians,"Jabaquara, Corinthians, Santos"
@@ -128,10 +129,10 @@ Giovanni,Santos,"Tuna Luso, Remo, Paysandu, Sãocarlense, Santos, Barcelona, Oly
 Grafite,São Paulo,
 Guga,Santos,
 Gustavo Gómez,Palmeiras,"Libertad, Lanús, Milan, Palmeiras"
-Gustavo Henrique,Corinthians,
+Gustavo Henrique,"Corinthians, Santos","Santos, Flamengo, Fenerbahçe, Real Valladolid, Corinthians"
 Gérson,São Paulo,"Flamengo, Botafogo, São Paulo, Fluminense"
 Heitor,Palmeiras,"SC Americano, Palmeiras"
-Hernanes,São Paulo,
+Hernanes,"Santo André, São Paulo","São Paulo, Santo André, São Paulo, Lazio, Internazionale, Juventus, Hebei China Fortune, São Paulo, Sport"
 Hugo Souza,Corinthians,"Flamengo, Chaves, Corinthians"
 Iago,São Paulo,
 Igor Vinícius,Santos,
@@ -139,24 +140,24 @@ Javier Mascherano,Corinthians,"River Plate, Corinthians, West Ham United, Liverp
 Jefferson,Botafogo-SP,
 Jhegson Méndez,São Paulo,
 Jhon Arias,Palmeiras,
-Joaquín Piquerez,Palmeiras,
+Joaquín Piquerez,Palmeiras,"River Plate (URU), Peñarol, Palmeiras"
 Jonathan Calleri,São Paulo,"All Boys, Boca Juniors, São Paulo, West Ham United, Las Palmas, Alavés, Espanyol, Osasuna, São Paulo"
 Jorge Mendonça,Palmeiras,
-Jorge Valdivia,Palmeiras,
+Jorge Valdivia,Palmeiras,"Colo-Colo, Rayo Vallecano, Servette, Palmeiras, Al-Ain, Palmeiras, Al-Wahda, Colo-Colo"
 Jose Poy,São Paulo,
-Josué,São Paulo,
+Josué,São Paulo,"Goiás, São Paulo, Wolfsburg, Atlético Mineiro"
 João Paulo,Santos,
 João Schmidt,Santos,
 Juary,Santos,
-Julinho Botelho,Palmeiras,
+Julinho Botelho,"Palmeiras, Portuguesa","Portuguesa, Fiorentina, Palmeiras"
 Juninho Fonseca,"Corinthians, Ponte Preta",
 Junqueira,Palmeiras,
-Jô,Corinthians,"All Boys, Boca Juniors, São Paulo, West Ham United, Las Palmas, Alavés, Espanyol, Osasuna, São Paulo"
-Júlio Baptista,São Paulo,
+Jô,Corinthians,"Corinthians, CSKA Moscou, Manchester City, Everton, Galatasaray, Internacional, Atlético Mineiro, Al-Shabab, Nagoya Grampus, Corinthians"
+Júlio Baptista,São Paulo,"São Paulo, Sevilla, Real Madrid, Arsenal, Roma, Málaga, Cruzeiro, Orlando City"
 Kaká,São Paulo,"São Paulo, Milan, Real Madrid, Milan, Orlando City, São Paulo, Orlando City"
 Leivinha,Palmeiras,"Portuguesa, Palmeiras, Atlético Madrid, São Paulo"
-Leonardo,São Paulo,
-Leônidas da Silva,São Paulo,
+Leonardo,São Paulo,"Flamengo, São Paulo, Valencia, São Paulo, Kashima Antlers, Paris Saint-Germain, Milan, São Paulo, Flamengo, Milan"
+Leônidas da Silva,São Paulo,"Bonsucesso, Peñarol, Vasco da Gama, Botafogo, Flamengo, São Paulo"
 Liedson,Corinthians,
 Liminha,Palmeiras,
 Luan Peres,Santos,
@@ -164,39 +165,38 @@ Lucas Evangelista,Palmeiras,
 Lucas Moura,São Paulo,"São Paulo, Paris Saint-Germain, Tottenham Hotspur, São Paulo"
 Lucas Veríssimo,Santos,"Santos, Benfica, Corinthians, Al-Duhail, Santos"
 Luciano,São Paulo,
-Lugano,São Paulo,"Nacional, Plaza Colonia, São Paulo, Fenerbahçe, Paris Saint-Germain, Málaga, West Bromwich Albion, Häcken, Cerro Porteño, São Paulo"
-Luisão,Juventus-SP,
+Luisão,Juventus-SP,"Juventus-SP, Cruzeiro, Benfica"
 Luizinho,Corinthians,"Corinthians, Juventus-SP, Corinthians"
 Luizão,"Corinthians, Guarani, Palmeiras, Santos, São Paulo","Guarani, Paraná, Palmeiras, Deportivo La Coruña, Vasco da Gama, Corinthians, Grêmio, Hertha BSC, Botafogo, São Paulo, Nagoya Grampus, Santos, Flamengo, São Caetano, Guaratinguetá, Rio Branco-SP"
-Luís Fabiano,"Ponte Preta, São Paulo",
+Luís Fabiano,"Ponte Preta, São Paulo","Ponte Preta, São Paulo, Rennes, Porto, Sevilla, São Paulo, Tianjin Quanjian, Vasco da Gama"
 Luís Pereira,Palmeiras,
 Léo,Santos,
 Lúcio,"Palmeiras, São Paulo","Internacional, Bayer Leverkusen, Bayern Munich, Internazionale, Juventus, São Paulo, Palmeiras, FC Goa, Gama, Brasiliense"
 Macedo,Santos,
 Marcelinho Carioca,Corinthians,"Flamengo, Corinthians, Valencia, Vasco da Gama, Santos, Gamba Osaka, Al-Nassr, Ajaccio, Brasiliense, Santo André"
 Marcos,Palmeiras,Palmeiras
-Marcos Antônio,São Paulo,Palmeiras
-Marcos Assunção,Santos,Palmeiras
+Marcos Antônio,São Paulo,
+Marcos Assunção,"Palmeiras, Santos",
 Marcos Rocha,Palmeiras,Palmeiras
 Marinho,Santos,
 Marlon Freitas,Palmeiras,
 Marquinhos,Corinthians,"Corinthians, Roma, Paris Saint-Germain"
 Matheus Bidu,Corinthians,
 Matheus Pereira,Corinthians,"Sporting CP, Chaves, Nürnberg, West Bromwich Albion, Al Hilal, Cruzeiro, Corinthians"
-Matheuzinho,Corinthians,"Flamengo, Palmeiras, Yokohama Flügels, Palmeiras, Grêmio, Palmeiras, Cruzeiro, Flamengo, Nova Iguaçu, Miami FC"
+Matheuzinho,Corinthians,"Flamengo, Corinthians"
 Matías Viña,Palmeiras,
 Mauro Ramos,São Paulo,"Sanjoanense, São Paulo, Santos, Toluca"
 Mauro Silva,"Bragantino, Guarani","Guarani, Bragantino, Deportivo La Coruña"
-Mazinho,"Bragantino, Palmeiras","Santa Cruz, Vasco da Gama, Lecce, Fiorentina, Palmeiras, Valencia, Celta de Vigo, Elche, Alavés, Vitória"
-Mazzola,Palmeiras,
+Mazinho,Palmeiras,"Santa Cruz, Vasco da Gama, Lecce, Fiorentina, Palmeiras, Valencia, Celta de Vigo, Elche, Alavés, Vitória"
+Mazzola,Palmeiras,"Palmeiras, Milan, Napoli, Juventus, Chiasso"
 Memphis Depay,Corinthians,"PSV Eindhoven, Manchester United, Lyon, Barcelona, Atlético Madrid, Corinthians"
 Mengálvio,Santos,
 Michel Bastos,"Palmeiras, São Paulo",
 Miguel Borja,Palmeiras,
 Mineiro,"Ponte Preta, São Caetano, São Paulo",
-Miranda,São Paulo,
-Murilo,Palmeiras,
-Mário Fernandes,São Caetano,
+Miranda,São Paulo,"Coritiba, Sochaux, São Paulo, Atlético de Madrid, Internazionale, Jiangsu Suning, São Paulo"
+Murilo,Palmeiras,"Cruzeiro, Palmeiras"
+Mário Fernandes,São Caetano,"São Caetano, Grêmio, CSKA Moscou, Internacional"
 Müller,"Corinthians, Palmeiras, Santos, São Paulo","São Paulo, Torino, Cruzeiro, Palmeiras, Santos, Corinthians, São Caetano, Tupi, Santo André, Ipatinga, Fernandópolis"
 Narciso,Santos,
 Neco,Corinthians,Corinthians
@@ -210,43 +210,45 @@ Oberdan Cattani,Palmeiras,"Palmeiras, Juventus-SP"
 Oscar,"Ponte Preta, São Paulo","Ponte Preta, New York Cosmos, São Paulo, Yokohama Marinos"
 Pablo Armero,Palmeiras,
 Pablo Forlán,São Paulo,
-Pablo Maia,São Paulo,
+Pablo Maia,São Paulo,São Paulo
 Pagão,Santos,
 Palhinha,"Corinthians, São Paulo",
 Paolo Guerrero,Corinthians,"Alianza Lima, Bayern Munich, Hamburger SV, Corinthians, Flamengo, Internacional, Avaí, Racing, LDU Quito, Universidad César Vallejo, Alianza Lima"
-Paulinho,"Bragantino, Corinthians, Palmeiras","Vasco da Gama, Bayer Leverkusen, Atlético Mineiro, Palmeiras"
-Paulo Henrique Ganso,Santos,
+Paulinho,"Bragantino, Corinthians","Bragantino, Corinthians, Tottenham, Guangzhou Evergrande, Barcelona, Guangzhou Evergrande, Al-Ahli, Corinthians"
+Paulinho (atacante),Palmeiras,"Vasco da Gama, Bayer Leverkusen, Atlético Mineiro, Palmeiras"
+Paulo Henrique Ganso,"Santos, São Paulo","Santos, São Paulo, Sevilla, Amiens, Fluminense"
 Paulo Nunes,Palmeiras,
 Pedro Rocha,São Paulo,"Peñarol, São Paulo, Coritiba, Palmeiras, Bangu, Monterrey"
 Pelé,Santos,"Santos, New York Cosmos"
-Pepe,"Corinthians Alagoano, Santos",Santos
+Pepe,Santos,Santos
 Philippe Coutinho,Santos,"Vasco da Gama, Internazionale, Espanyol, Liverpool, Barcelona, Bayern Munich, Aston Villa, Al-Duhail, Vasco da Gama, Santos"
 Pita,"Santos, São Paulo",
 Rafael,São Paulo,
 Rafael Cabral,Santos,
-Rafael Tolói,São Paulo,
+Rafael Tolói,São Paulo,"Goiás, São Paulo, Roma, Atalanta"
 Ralf,Corinthians,
-Ramires,Palmeiras,
+Ramires,Palmeiras,"Joinville, Cruzeiro, Benfica, Chelsea, Jiangsu Suning, Palmeiras"
 Raniele,Corinthians,
-Raphael Veiga,Palmeiras,
+Raphael Veiga,Palmeiras,"Coritiba, Palmeiras, Athletico Paranaense, Palmeiras"
 Raí,"Botafogo-SP, São Paulo","Botafogo-SP, Ponte Preta, São Paulo, Paris Saint-Germain, São Paulo"
-Renato,"Guarani, Ponte Preta, Santos, São Paulo","Guarani, São Paulo, Botafogo, Atlético Mineiro, Yokohama Marinos, Kashiwa Reysol, Ponte Preta"
-Renato Augusto,Corinthians,"Guarani, São Paulo, Botafogo, Atlético Mineiro, Yokohama Marinos, Kashiwa Reysol, Ponte Preta"
+Renato,"Guarani, Ponte Preta, São Paulo","Guarani, São Paulo, Botafogo, Atlético Mineiro, Yokohama Marinos, Kashiwa Reysol, Ponte Preta"
+Renato (volante),"Guarani, Santos","Guarani, Santos, Sevilla, Botafogo, Santos"
+Renato Augusto,Corinthians,"Flamengo, Bayer Leverkusen, Corinthians, Beijing Guoan, Corinthians, Fluminense"
 Ricardinho,"Corinthians, Santos, São Paulo","Paraná, Bordeaux, Corinthians, São Paulo, Middlesbrough, Santos, Corinthians, Besiktas, Al-Rayyan, Atlético Mineiro, Bahia"
-Ricardo Oliveira,Santos,
+Ricardo Oliveira,"Portuguesa, Santos, São Paulo","Portuguesa, Santos, Valencia, Real Betis, São Paulo, Milan, Real Zaragoza, Al-Jazira, Santos, Atlético Mineiro"
 Ricardo Rocha,"Santos, São Paulo",
-Rivaldo,"Corinthians, Mogi Mirim, Palmeiras, S. Caetano, São Paulo","Santa Cruz, Mogi Mirim, Corinthians, Palmeiras, Deportivo La Coruña, Barcelona, Milan, Cruzeiro, Olympiacos, AEK Atenas, Bunyodkor, São Paulo, Kabuscorp, São Caetano, Mogi Mirim"
+Rivaldo,"Corinthians, Mogi Mirim, Palmeiras, São Caetano, São Paulo","Santa Cruz, Mogi Mirim, Corinthians, Palmeiras, Deportivo La Coruña, Barcelona, Milan, Cruzeiro, Olympiacos, AEK Atenas, Bunyodkor, São Paulo, Kabuscorp, São Caetano, Mogi Mirim"
 Rivellino,Corinthians,"Corinthians, Fluminense, Al-Hilal"
-Robert,Santos,"Corinthians, Newell's Old Boys"
-Robert Arboleda,São Paulo,
+Robert,Santos,
+Robert Arboleda,São Paulo,"Universidad Católica (EQU), São Paulo"
 Roberto Belangero,Corinthians,"Corinthians, Newell's Old Boys"
 Roberto Carlos,"Corinthians, Palmeiras, União São João","União São João, Atlético Mineiro, Palmeiras, Internazionale, Real Madrid, Fenerbahçe, Corinthians, Anzhi Makhachkala, Delhi Dynamos"
 Roberto Dias,São Paulo,
 Robinho,Santos,"Santos, Real Madrid, Manchester City, Santos, Milan, Santos, Guangzhou Evergrande, Atlético Mineiro, Sivasspor, İstanbul Başakşehir"
 Rodolfo Rodríguez,Santos,
-Rodrigo Garro,Corinthians,
+Rodrigo Garro,Corinthians,"Instituto, Talleres, Corinthians"
 Rodrigues Tatu,Palmeiras,
-Rodrygo,Santos,
+Rodrygo,Santos,"Santos, Real Madrid"
 Rogério Ceni,São Paulo,"Sinop, São Paulo"
 Romeu Pellicciari,Palmeiras,
 Ronaldo Fenômeno,Corinthians,"Cruzeiro, PSV Eindhoven, Barcelona, Internazionale, Real Madrid, Milan, Corinthians"
@@ -255,21 +257,20 @@ Ronaldão,São Paulo,
 Rony,"Palmeiras, Santos","Remo, Cruzeiro, Náutico, Albirex Niigata, Athletico Paranaense, Palmeiras, Santos"
 Roque Júnior,"Ituano, Palmeiras, São José","São José, Palmeiras, Milan, Leeds United, Siena, Bayer Leverkusen, MSV Duisburg, Al-Rayyan, Ituano"
 Rui,São Paulo,
-Serginho Chulapa,"Corinthians, Portuguesa, Santos, São Paulo","São Paulo, Marília, Santos, Corinthians, Marítimo, Santos, Malatyaspor, Santos, Portuguesa Santista, São Caetano, Atlético Sorocaba"
+Serginho Chulapa,"Atlético Sorocaba, Corinthians, Marília, Portuguesa Santista, Santos, São Caetano, São Paulo","São Paulo, Marília, Santos, Corinthians, Marítimo, Santos, Malatyaspor, Santos, Portuguesa Santista, São Caetano, Atlético Sorocaba"
 Servílio,Palmeiras,
 Silas,"Campinas, São Paulo",
-Souza,São Paulo,"Flamengo, Chaves, Corinthians"
+Souza,São Paulo,
 Sócrates,"Botafogo-SP, Corinthians, Santos","Botafogo-SP, Corinthians, Fiorentina, Flamengo, Santos, Garforth Town"
 Teixeirinha,São Paulo,
 Teleco,Corinthians,"Britânia, Corinthians, Santos, Juventus-SP"
-Thiago Motta,Juventus-SP,
-Tomás Rincón,Santos,
-Tupãzinho,Corinthians,"Flamengo, Palmeiras, Yokohama Flügels, Palmeiras, Grêmio, Palmeiras, Cruzeiro, Flamengo, Nova Iguaçu, Miami FC"
+Thiago Motta,Juventus-SP,"Barcelona, Atlético de Madrid, Genoa, Internazionale, Paris Saint-Germain"
+Tomás Rincón,Santos,"Deportivo Táchira, Hamburgo, Genoa, Juventus, Torino, Sampdoria, Santos"
+Tupãzinho,Corinthians,
 Tupãzinho (Anos 60),Palmeiras,"Flamengo, Palmeiras, Yokohama Flügels, Palmeiras, Grêmio, Palmeiras, Cruzeiro, Flamengo, Nova Iguaçu, Miami FC"
 Vaguinho,Corinthians,
+Valdir de Morais,Palmeiras,
 Valdir Peres,São Paulo,
-Valdir de Morais,Palmeiras,"Botafogo-SP, Ponte Preta, São Paulo, Paris Saint-Germain, São Paulo"
-Valdivia,Palmeiras,
 Vampeta,Corinthians,"Vitória, PSV Eindhoven, VVV-Venlo, Fluminense, Corinthians, Internazionale, Paris Saint-Germain, Flamengo, Goiás, Brasiliense, Juventus-SP, Grêmio Osasco"
 Victor Ferraz,Santos,
 Viola,"Corinthians, Palmeiras, Santos","Corinthians, São José, Olímpia, Valencia, Palmeiras, Santos, Vasco da Gama, Gaziantepspor, Guarani, Bahia, Flamengo, Juventus-SP, Uberlândia, Duque de Caxias, Resende, Brusque, Grêmio Osasco, Tanabi, Taboão da Serra"
@@ -278,15 +279,16 @@ Vágner Bacharel,Palmeiras,
 Víctor Aristizábal,"Santos, São Paulo","Atlético Nacional, Valencia, Blackburn Rovers, Atlético Nacional, São Paulo, Santos, Atlético Nacional, Deportivo Cali, Vitória, Cruzeiro, Coritiba, Atlético Nacional"
 Waldemar Fiume,Palmeiras,Palmeiras
 Waldir Peres,"Corinthians, Guarani, Ponte Preta, São Paulo","Ponte Preta, São Paulo, América-RJ, Guarani, Corinthians, Portuguesa, Santa Cruz"
-Wendell,São Paulo,
+Wendell,São Paulo,"Londrina, Bayer Leverkusen, Porto, São Paulo"
 Weverton,"Corinthians, Palmeiras","Juventus-AC, Remo, Corinthians, Oeste, América de Natal, Botafogo-SP, Portuguesa, Athletico Paranaense, Palmeiras"
 Wiliam,Corinthians,
-Willian,"Corinthians, Palmeiras",
+Willian,Corinthians,"Corinthians, Shakhtar Donetsk, Anzhi, Chelsea, Arsenal, Corinthians, Fulham"
 Willian Arão,Santos,
+Willian Bigode,Palmeiras,
 Wladimir,Corinthians,"Corinthians, Santo André, Ponte Preta, Santos, Cruzeiro, São Caetano, Central"
 Wílson Mano,Corinthians,
 Yeferson Soteldo,Santos,
-Yerry Mina,Palmeiras,
+Yerry Mina,Palmeiras,"Deportivo Pasto, Independiente Santa Fe, Palmeiras, Barcelona, Everton, Fiorentina, Cagliari"
 Yuri Alberto,Corinthians,"Santos, Internacional, Zenit, Corinthians"
 Zenon,Corinthians,
 Zequinha,Palmeiras,
