@@ -19,7 +19,7 @@ const PRONUNCIA = {'Botafogo-SP':'Botafogo de Ribeirão Preto','Juventus-SP':'Ju
   'Barcelona-SP':'Barcelona','Flamengo-SP':'Flamengo de Guarulhos','América-SP':'América de Rio Preto','Rio Branco-SP':'Rio Branco de Americana','Independente-SP':'Independente de Limeira','ECUS':'E C U S','USAC':'U S A C'};
 const pronuncia = t => PRONUNCIA[t]||t;
 /* grafias diferentes do mesmo clube na coluna de times paulistas */
-const ALIAS_CLUBE = {'S. Caetano':'São Caetano', 'Sao Paulo':'São Paulo', 'Red Bull Bragantino':'Bragantino'};
+const ALIAS_CLUBE = {'S. Caetano':'São Caetano', 'Sao Paulo':'São Paulo', 'Bragantino':'Red Bull Bragantino'};
 const ARTIGO_NA = ['Ponte Preta','Portuguesa','Ferroviária','Inter de Limeira','Francana','Matonense','Internacional de Limeira'];
 
 /* =========================================================
