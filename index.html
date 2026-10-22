@@ -170,10 +170,10 @@ function corDe(n){let h=0; for(const c of n) h=(h*31+c.charCodeAt(0))>>>0; retur
    ========================================================= */
 const BANCO = {imgs:new Map(), silh:new Map()};
 function imgDe(key){
-  const src=urlImagem(key);
-  let im=BANCO.imgs.get(key);
-  if(!im){ im=new Image(); im.onload=()=>{S.relayout=true}; im.src=src; BANCO.imgs.set(key,im) }
-  return (im.complete&&im.naturalWidth)?im:null;
+  if(BANCO.imgs.has(key)) return BANCO.imgs.get(key);
+  BANCO.imgs.set(key,null);
+  carregarImagem(key).then(r=>{ if(r){ BANCO.imgs.set(key,r.im); S.relayout=true } });
+  return null;
 }
 function silhuetaDe(key){
   const im=imgDe(key); if(!im) return null;
@@ -201,7 +201,7 @@ function rodadasDois(){
   }));
   const esc=[...shuffle(cands[3]).slice(0,3), ...shuffle(cands[2])].slice(0,10);
   return shuffle(esc).map(({cs,todos,parcial})=>{ const certa=shuffle(todos)[0].nome;
-    return {prompt:'Quem jogou em '+(cs.length>2?'todos?':'ambos?'), badges:cs, seq:false, opcoes:shuffle([certa,...outros(parcial.map(j=>j.nome),certa)]), avatares:true, certa, respKey:'jogador:'+slug(certa), fala:'Quem jogou em '+cs.slice(0,-1).join(', ')+' e '+cs.at(-1)+'?'} });
+    return {prompt:'Quem jogou em '+(cs.length>2?'todos?':'ambos?'), badges:cs, seq:false, opcoes:shuffle([certa,...outros(parcial.map(j=>j.nome),certa)]), avatares:true, certa, respKey:'jogador:'+slug(certa), fala:'Quem jogou em '+cs.slice(0,-1).map(pronuncia).join(', ')+' e '+pronuncia(cs.at(-1))+'?', falaSeg:['Quem jogou em',...cs.slice(0,-1),'e',cs.at(-1)]} });
 }
 function rodadasIntruso(){
   const clubes=shuffle([...DB.porClube.entries()].filter(([,l])=>l.length>=5).map(([c])=>c));
@@ -210,13 +210,13 @@ function rodadasIntruso(){
     const c=clubes[i%clubes.length], jogaram=shuffle(DB.porClube.get(c)).slice(0,5).map(j=>j.nome);
     const fora=DB.jogadores.filter(j=>!j.paulistas.includes(c)), parecidos=fora.filter(j=>j.paulistas.some(p=>GRANDES.includes(p)));
     const intr=shuffle(parecidos.length?parecidos:fora)[0].nome;
-    return {prompt:`Quem nunca jogou ${artigo(c)} ${c}?`, clube:c, opcoes:shuffle([...jogaram,intr]), avatares:true, certa:intr, fala:`Quem nunca jogou ${artigo(c)} ${c}?`};
+    return {prompt:`Quem nunca jogou ${artigo(c)} ${c}?`, clube:c, opcoes:shuffle([...jogaram,intr]), avatares:true, certa:intr, fala:`Quem nunca jogou ${artigo(c)} ${pronuncia(c)}?`, falaSeg:[`Quem nunca jogou ${artigo(c)}`, c]};
   });
 }
 async function prepararPool(id){
   if(POOL[id]) return POOL[id];
   if(id==='escudo'){
-    const todos=[...new Set([...DB.porClube.keys(), ...DB.jogadores.flatMap(j=>j.carreira)])];
+    const todos=[...new Set([...DB.porClube.keys(), ...DB.clubesComEscudo, ...DB.jogadores.flatMap(j=>j.carreira)])];
     const ok=await filtrarComImagem('clube',todos);
     POOL.escudo = ok.length>=4 ? ok : [...DB.porClube.keys()];
   } else {
@@ -227,12 +227,12 @@ async function prepararPool(id){
 }
 function montarRodadas(id){
   if(id==='carreira'){ const pool=poolCarreira(), nomes=pool.map(j=>j.nome);
-    return shuffle(pool).slice(0,10).map(j=>({prompt:'Quem é o jogador?', badges:j.carreira, seq:true, opcoes:shuffle([j.nome,...outros(nomes,j.nome)]), avatares:true, certa:j.nome, respKey:'jogador:'+slug(j.nome), fala:'Quem é o jogador? '+j.carreira.join(', ')})) }
+    return shuffle(pool).slice(0,10).map(j=>({prompt:'Quem é o jogador?', badges:j.carreira, seq:true, opcoes:shuffle([j.nome,...outros(nomes,j.nome)]), avatares:true, certa:j.nome, respKey:'jogador:'+slug(j.nome), fala:'Quem é o jogador? '+j.carreira.map(pronuncia).join(', '), falaSeg:['Quem é o jogador?',...j.carreira]})) }
   if(id==='dois-clubes') return rodadasDois();
   if(id==='intruso') return rodadasIntruso();
-  if(id==='quiz') return shuffle(DB.quiz).slice(0,10).map(c=>({prompt:c.q, opcoes:shuffle(c.opcoes), certa:c.certa, fala:c.q}));
-  if(id==='escudo'){ const P=POOL.escudo||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'De qual clube é este escudo?', imgKey:'clube:'+slug(n), generico:'escudo', opcoes:shuffle([n,...outros(P,n)]), certa:n, respKey:'clube:'+slug(n), fala:'De qual clube é este escudo?'})) }
-  if(id==='silhueta'){ const P=POOL.silhueta||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'Quem é este jogador?', imgKey:'jogador:'+slug(n), generico:'jogador', opcoes:shuffle([n,...outros(P,n)]), avatares:false, certa:n, respKey:'jogador:'+slug(n), fala:'Quem é este jogador?'})) }
+  if(id==='quiz') return shuffle(DB.quiz).slice(0,10).map(c=>({prompt:c.q, opcoes:shuffle(c.opcoes), certa:c.certa, fala:c.q, falaSeg:[c.q]}));
+  if(id==='escudo'){ const P=POOL.escudo||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'De qual clube é este escudo?', imgKey:'clube:'+slug(n), generico:'escudo', opcoes:shuffle([n,...outros(P,n)]), certa:n, respKey:'clube:'+slug(n), fala:'De qual clube é este escudo?', falaSeg:['De qual clube é este escudo?']})) }
+  if(id==='silhueta'){ const P=POOL.silhueta||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'Quem é este jogador?', imgKey:'jogador:'+slug(n), generico:'jogador', opcoes:shuffle([n,...outros(P,n)]), avatares:false, certa:n, respKey:'jogador:'+slug(n), fala:'Quem é este jogador?', falaSeg:['Quem é este jogador?']})) }
   return [];
 }
 
@@ -295,12 +295,43 @@ function agenda(){
 let VOZ=null;
 function carregarVoz(){ const vs=speechSynthesis.getVoices(); VOZ=vs.find(v=>/pt[-_]BR/i.test(v.lang))||vs.find(v=>/^pt/i.test(v.lang))||null }
 if('speechSynthesis' in window){ carregarVoz(); speechSynthesis.onvoiceschanged=carregarVoz }
-function falar(t){
-  if(!S.narracao||!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang='pt-BR'; if(VOZ) u.voice=VOZ; u.rate=1.08;
-  u.onstart=()=>{ if(AU.mus) AU.mus.gain.setTargetAtTime(.1,agora(),.05) };
-  u.onend=()=>{ if(AU.mus) AU.mus.gain.setTargetAtTime(.32,agora(),.2) };
-  speechSynthesis.speak(u);
+/* Narração: usa os áudios de narracao/ quando existem (entram no vídeo);
+   senão, a voz do navegador (que os navegadores não permitem gravar). */
+const NARR={indice:null, buf:new Map(), fontes:[], id:0};
+async function carregarIndiceNarracao(){ try{ const r=await fetch(CONFIG.narracao+'indice.json',{cache:'no-cache'}); if(r.ok) NARR.indice=new Set(await r.json()) }catch(e){} }
+const temAudio = seg => !!(NARR.indice&&AU.ctx&&seg&&seg.length&&seg.every(x=>NARR.indice.has(slug(x))));
+function bufferDe(t){
+  const k=slug(t); if(NARR.buf.has(k)) return NARR.buf.get(k);
+  const p=fetch(CONFIG.narracao+k+'.mp3').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,ko)=>AU.ctx.decodeAudioData(b,ok,ko))).catch(()=>null);
+  NARR.buf.set(k,p); return p;
+}
+function abaixarTrilha(s){ if(AU.mus&&AU.ctx) AU.mus.gain.setTargetAtTime(s?.08:.32,agora(),s?.05:.2) }
+function pararFala(){ NARR.fontes.forEach(f=>{try{f.stop()}catch(e){}}); NARR.fontes=[]; if('speechSynthesis' in window) speechSynthesis.cancel() }
+/* devolve uma promessa que termina quando a fala acaba */
+function falar(texto, seg){
+  const id=++NARR.id; pararFala();
+  if(!S.narracao) return Promise.resolve();
+  if(temAudio(seg)) return tocarAudios(seg,id);
+  return falarNavegador(texto,id);
+}
+async function tocarAudios(seg,id){
+  const bufs=await Promise.all(seg.map(bufferDe));
+  if(id!==NARR.id) return;
+  if(bufs.some(b=>!b)) return falarNavegador(seg.map(pronuncia).join(' '),id);
+  abaixarTrilha(true); let t=agora()+.03;
+  NARR.fontes=bufs.map(b=>{ const f=AU.ctx.createBufferSource(); f.buffer=b; f.connect(AU.master); f.start(t); t+=b.duration+.06; return f });
+  await espera((t-agora())*1000);
+  if(id===NARR.id) abaixarTrilha(false);
+}
+function falarNavegador(t,id){
+  if(!('speechSynthesis' in window)) return Promise.resolve();
+  return new Promise(res=>{
+    let feito=false; const fim=()=>{ if(feito) return; feito=true; clearTimeout(lim); if(id===NARR.id) abaixarTrilha(false); res() };
+    const lim=setTimeout(fim, 1500+t.length*95);
+    const u=new SpeechSynthesisUtterance(t); u.lang='pt-BR'; if(VOZ) u.voice=VOZ; u.rate=1.08;
+    u.onstart=()=>abaixarTrilha(true); u.onend=fim; u.onerror=fim;
+    speechSynthesis.speak(u);
+  });
 }
 
 /* =========================================================
@@ -369,7 +400,7 @@ function renderPlay(){
   raf=requestAnimationFrame(loop);
 }
 function sairDoPalco(){
-  clearInterval(tick); cancelAnimationFrame(raf); musicaDesliga(); if('speechSynthesis' in window) speechSynthesis.cancel();
+  clearInterval(tick); cancelAnimationFrame(raf); musicaDesliga(); NARR.id++; pararFala();
   if(S.recorder&&S.recorder.state!=='inactive'&&S.abortado){ S.recorder.onstop=null; S.recorder.stop(); S.gravando=false }
   if(S.stream&&S.abortado){ S.stream.getTracks().forEach(t=>t.stop()); S.stream=null }
   removeEventListener('resize', posicionarOverlays);
@@ -385,6 +416,7 @@ async function iniciar(comCamera){
   }
   if(AU.ctx&&AU.dest&&S.stream&&S.stream.getAudioTracks().length){ AU.mic=AU.ctx.createMediaStreamSource(S.stream); AU.mic.connect(AU.dest) }
   try{ await Promise.all([document.fonts.load('800 40px "Barlow Condensed"'),document.fonts.load('600 20px "Barlow"')]) }catch(e){}
+  if(NARR.indice&&AU.ctx) S.rodadas.forEach(r=>[...(r.falaSeg||[]), r.certa].forEach(x=>{ if(NARR.indice.has(slug(x))) bufferDe(x) }));
   S.rodadas.forEach(r=>{ if(r.imgKey) imgDe(r.imgKey); (r.badges||[]).forEach(b=>imgDe('clube:'+slug(b))); if(r.clube) imgDe('clube:'+slug(r.clube)); r.opcoes.forEach(o=>{imgDe('jogador:'+slug(o)); imgDe('clube:'+slug(o))}) });
   S.pausado=true; S.contagemAt=performance.now(); go('play');
   comecarGravacao();
@@ -396,7 +428,7 @@ async function iniciar(comCamera){
 function novaRodada(){
   S.tentativa=1; S.desabilitadas=[]; S.fb=null; S.leaveAt=0; S.enterAt=performance.now(); S.layout=calcularLayout(S.rodadas[S.i]);
   posicionarOverlays(); SFX.whoosh(); ligarRelogio();
-  const r=S.rodadas[S.i]; sr.textContent=`Rodada ${S.i+1}. ${r.fala}`; falar(r.fala);
+  const r=S.rodadas[S.i]; sr.textContent=`Rodada ${S.i+1}. ${r.fala}`; falar(r.fala, r.falaSeg);
 }
 function ligarRelogio(){
   S.pausado=false; S.congelado=null; S.fim=performance.now()+S.game.tempo*1000; S.ultimoTick=null;
@@ -413,8 +445,10 @@ function responder(valor){
   if(certo){
     const pts=(S.tentativa===1?1000:500)+Math.round((S.tentativa===1?500:250)*left/S.game.tempo);
     S.pontos+=pts; S.log.push({ok:true, t:S.tentativa, seg:S.game.tempo-left});
-    S.fb={k:'ok', t:'Acertou!', at:now}; S.pop={t:'+'+fmt(pts), at:now}; confete(); SFX.acerto(); falar(`Isso! ${r.certa}!`); sr.textContent=`Acertou: ${r.certa}. Mais ${pts} pontos.`;
-    posicionarOverlays(); setTimeout(proxima,1500);
+    S.fb={k:'ok', t:'Acertou!', at:now}; S.pop={t:'+'+fmt(pts), at:now}; confete(); SFX.acerto(); sr.textContent=`Acertou: ${r.certa}. Mais ${pts} pontos.`;
+    posicionarOverlays();
+    /* a próxima rodada só começa depois de o nome ser lido */
+    Promise.all([espera(1300), espera(250).then(()=>falar(pronuncia(r.certa),[r.certa]))]).then(proxima);
   } else if(S.tentativa===1){
     if(valor) S.desabilitadas.push(valor);
     S.fb={k:'retry', t: valor==null?'Tempo! Mais uma chance':'Errou! Mais uma chance', at:now}; S.shakeAt=now; SFX.erro(); sr.textContent=S.fb.t;
@@ -436,7 +470,7 @@ function posicaoNoRanking(){ const l=RANKING_FIXO[S.game.id]||[]; return l.filte
 async function finalizar(){
   S.final=true; S.finalAt=performance.now(); S.layout=null; clearInterval(tick); musicaDesliga(); posicionarOverlays();
   SFX.fanfarra(); const ac=S.log.filter(l=>l.ok).length;
-  falar(`Fim de jogo! Você fez ${fmt(S.pontos)} pontos e acertou ${ac} de ${S.rodadas.length}.`);
+  falar(`Fim de jogo! Você fez ${fmt(S.pontos)} pontos e acertou ${ac} de ${S.rodadas.length}.`, ['Fim de jogo!']);
   const linhas=linhasRankingFinal().length;
   for(let k=0;k<linhas;k++){ setTimeout(()=>{ if(S.tela==='play') SFX.pop() }, 2200+k*260) }
   await espera(2600+linhas*260+2600);
@@ -778,7 +812,7 @@ function renderResult(){
 }
 
 app.innerHTML='<div class="page"><p class="lead">Carregando…</p></div>';
-carregarDados().then(render).catch(e=>{
+Promise.all([carregarDados(), carregarIndiceNarracao()]).then(render).catch(e=>{
   app.innerHTML=`<div class="page"><h2>Não foi possível carregar os dados</h2><p class="lead">${esc(e.message)}.</p><p class="note">Se o arquivo foi aberto direto do computador, use um servidor local (veja o LEIA-ME).</p></div>`;
 });
 </script>
