@@ -107,7 +107,7 @@ video.preview{width:100%; border-radius:18px; background:#000; aspect-ratio:9/16
 <body>
 <div class="app" id="app"></div>
 <div class="sr" aria-live="polite" id="sr"></div>
-<script src="js/dados.js?v=2026-10-22"></script>
+<script src="js/dados.js?v=2026-10-23"></script>
 <script>
 
 /* =========================================================
@@ -199,8 +199,10 @@ function rodadasIntruso(){
 async function prepararPool(id){
   if(POOL[id]) return POOL[id];
   if(id==='escudo'){
-    const todos=[...new Set([...DB.porClube.keys(), ...DB.clubesComEscudo, ...DB.jogadores.flatMap(j=>j.carreira)])];
-    const ok=await filtrarComImagem('clube',todos);
+    /* só clubes de São Paulo: arquivo registrado em escudos.csv terminando em " - SP" */
+    const deSP = nome => (DB.mapaEscudos[slug(nome)]||'').split('|').some(f=>/\s-\s*SP\s*(\(\d+\))?(\.[a-z]+)?$/i.test(f.trim()));
+    const paulistas=[...new Set(DB.clubesComEscudo)].filter(deSP);
+    const ok=await filtrarComImagem('clube',paulistas);
     POOL.escudo = ok.length>=4 ? ok : [...DB.porClube.keys()];
   } else {
     const nomes=DB.jogadores.map(j=>j.nome), ok=await filtrarComImagem('jogador',nomes);
