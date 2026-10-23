@@ -60,6 +60,19 @@ def campo(linha, *nomes):
     return ""
 
 
+def lista_colchetes(s):
+    """Separa por vírgula, ignorando vírgulas dentro de [colchetes]."""
+    out, atual, nivel = [], "", 0
+    for ch in (s or ""):
+        nivel += ch == "["; nivel -= ch == "]"
+        if ch == "," and nivel == 0:
+            out.append(atual.strip()); atual = ""
+        else:
+            atual += ch
+    if atual.strip(): out.append(atual.strip())
+    return [ALIAS.get(x, x) for x in out if x]
+
+
 def lista(s):
     return [ALIAS.get(x.strip(), x.strip()) for x in (s or "").split(",") if x.strip()]
 
@@ -74,7 +87,7 @@ def falas():
     for r in ler("escalacoes.csv"):
         out.append(ALIAS.get(campo(r, "Time"), campo(r, "Time")))
         out.append(f"campeão de {campo(r, 'Ano')}")
-        out += lista(campo(r, "Escalação", "Titulares")) + lista(campo(r, "Substitutos", "Reservas"))
+        out += [re.sub(r"^[A-Za-z]{2,4}\s*:\s*", "", re.sub(r"\s*\[.*\]\s*$", "", x)) for x in lista_colchetes(campo(r, "Escalação", "Titulares")) + lista_colchetes(campo(r, "Substitutos", "Reservas"))]
     for r in ler("quiz.csv"):
         out.append(campo(r, "Pergunta"))
     vistos, unicas = set(), []

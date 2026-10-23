@@ -107,7 +107,7 @@ video.preview{width:100%; border-radius:18px; background:#000; aspect-ratio:9/16
 <body>
 <div class="app" id="app"></div>
 <div class="sr" aria-live="polite" id="sr"></div>
-<script src="js/dados.js?v=2026-10-26"></script>
+<script src="js/dados.js?v=2026-10-28"></script>
 <script>
 
 /* =========================================================
@@ -254,7 +254,7 @@ function montarRodadas(id){
     if(err.length<3) err=err.concat(shuffle((DB.porClube.get(e.time)||[]).map(j=>j.nome).filter(n=>fora(n)&&!err.includes(n))).slice(0,3-err.length));
     if(err.length<3) err=err.concat(shuffle(DB.jogadores.map(j=>j.nome).filter(n=>fora(n)&&!err.includes(n))).slice(0,3-err.length));
     const art=artigo(e.time);
-    return {prompt:`Quem falta ${art} ${e.time} campeão de ${e.ano}?`, campo:{time:e.time, titulares:e.titulares, linhas:e.linhas, falta:k}, opcoes:shuffle([certa,...err]), avatares:true, certa, respKey:'jogador:'+slug(certa),
+    return {prompt:`Quem falta ${art} ${e.time} campeão de ${e.ano}?`, campo:{time:e.time, titulares:e.titulares, slots:e.slots, falta:k}, opcoes:shuffle([certa,...err]), avatares:true, certa, respKey:'jogador:'+slug(certa),
       fala:`Quem falta ${art} ${pronuncia(e.time)} campeão de ${e.ano}?`, falaSeg:[`Quem falta ${art}`, e.time, `campeão de ${e.ano}`],
       falaCurta:`${pronuncia(e.time)}, campeão de ${e.ano}`, falaSegCurta:[e.time, `campeão de ${e.ano}`]};
   });
@@ -563,15 +563,34 @@ function montarLayout(r,k){
   L.prompt={lines, y:y+ps*.85, size:ps, lh:ps*1.08}; y+=lines.length*ps*1.08+6;
   y+=6*k;
   if(r.campo){
-    const fw=IW, fh=Math.min(fw*1.02, 600*k), lin=r.campo.linhas, nrow=lin.length, maxPor=Math.max(...lin);
-    const sh=Math.min(fw/(maxPor+1.2)*.78, fh/(nrow*1.75)), colW=fw/maxPor-6;
-    let lab=Math.max(12,Math.round(19*k));
+    /* coordenadas do campinho (x da esquerda para a direita, y do próprio gol ao ataque, de 0 a 100) */
+    const sl=r.campo.slots, fw=IW, fh=Math.min(fw*1.18, 680*k);
+    const sh=Math.min(fw*.105, fh*.085);
+    let lab=Math.max(11,Math.round(18*k));
+    const colW=fw*.2;
     const ls=f=>r.campo.titulares.map(nm=>quebrar(nm,colW,f,700));
-    while(lab>12 && ls(lab).some(l=>l.length>2||largMax(l,lab,700)>colW)) lab--;
-    const linhas=ls(lab), pos=[]; let idx=0;
-    lin.forEach((q,ri)=>{ const yy=fh-(fh/nrow)*(ri+.5)-lab*.6; for(let c=0;c<q;c++){ pos.push({cx:X+pad+fw*(c+.5)/q, cy:y+yy, nome:r.campo.titulares[idx], linhas:linhas[idx], i:idx}); idx++ } });
+    while(lab>11 && ls(lab).some(l=>l.length>2||largMax(l,lab,700)>colW)) lab--;
+    const linhas=ls(lab);
+    const mx=fw*.08, myT=sh*.6, myB=sh*.6+lab*2.4;
+    const caixas=sl.map((q,idx)=>{ const w=Math.max(sh*1.1, largMax(linhas[idx],lab,700)+6), h=sh+lab*1.12*linhas[idx].length+4;
+      return {cx:X+pad+mx+(fw-2*mx)*q.px, cy:y+myT+(fh-myT-myB)*(1-(q.py-.1)/.82), w, h, idx} });
+    /* afasta camisas e nomes que se sobrepõem (posições muito próximas): cada jogador ocupa uma caixa (camisa + nome) */
+    const topo=c=>c.cy-sh*.55, base=c=>topo(c)+c.h;
+    const limita=c=>{ c.cx=Math.min(X+pad+fw-c.w/2-2, Math.max(X+pad+c.w/2+2, c.cx)); const t=Math.min(y+fh-c.h-2, Math.max(y+2, topo(c))); c.cy=t+sh*.55 };
+    caixas.forEach(limita);
+    for(let it=0;it<150;it++){ let mexeu=false;
+      for(let a=0;a<caixas.length;a++) for(let b=a+1;b<caixas.length;b++){
+        const A=caixas[a], B=caixas[b];
+        const ox=Math.min(A.cx+A.w/2,B.cx+B.w/2)-Math.max(A.cx-A.w/2,B.cx-B.w/2)+3;
+        const oy=Math.min(base(A),base(B))-Math.max(topo(A),topo(B))+2;
+        if(ox>0&&oy>0){ mexeu=true;
+          if(ox<=oy*1.4){ const d=ox/2*(A.cx<=B.cx?-1:1)*.6; A.cx+=d; B.cx-=d }
+          else { const d=oy/2*(topo(A)<=topo(B)?-1:1)*.6; A.cy+=d; B.cy-=d } } }
+      caixas.forEach(limita);
+      if(!mexeu) break; }
+    const pos=caixas.map(c=>({cx:c.cx, cy:c.cy, nome:r.campo.titulares[c.idx], linhas:linhas[c.idx], i:c.idx}));
     L.campo={x:X+pad, y, w:fw, h:fh, sh, lab, pos};
-    if(sh<34) L.okLinhas=false;
+    if(sh<30) L.okLinhas=false;
     y+=fh+10*k;
   }
   if(r.badges){
