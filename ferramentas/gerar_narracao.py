@@ -28,7 +28,7 @@ VOZ = os.environ.get("AZURE_TTS_VOZ", "pt-BR-AntonioNeural")
 VELOCIDADE = os.environ.get("AZURE_TTS_VELOCIDADE", "+5%")
 
 FIXAS = ["Quem é o jogador?", "Quem jogou em", "e", "Quem nunca jogou no", "Quem nunca jogou na",
-         "De qual clube é este escudo?", "Quem é este jogador?", "Fim de jogo!"]
+         "De qual clube é este escudo?", "Quem falta no", "Quem falta na", "Fim de jogo!"]
 # mesma lista de js/dados.js
 PRONUNCIA = {"Botafogo-SP": "Botafogo de Ribeirão Preto", "Juventus-SP": "Juventus da Mooca", "Nacional-SP": "Nacional",
              "Comercial-SP": "Comercial", "River Plate (URU)": "River Plate", "Universidad Católica (EQU)": "Universidad Católica",
@@ -71,6 +71,10 @@ def falas():
         out += lista(campo(r, "Times Paulistas que Passou")) + lista(campo(r, "Todos os Times da Carreira"))
     for r in ler("escudos.csv"):
         out.append(ALIAS.get(campo(r, "Clube"), campo(r, "Clube")))
+    for r in ler("escalacoes.csv"):
+        out.append(ALIAS.get(campo(r, "Time"), campo(r, "Time")))
+        out.append(f"campeão de {campo(r, 'Ano')}")
+        out += lista(campo(r, "Escalação", "Titulares")) + lista(campo(r, "Substitutos", "Reservas"))
     for r in ler("quiz.csv"):
         out.append(campo(r, "Pergunta"))
     vistos, unicas = set(), []
