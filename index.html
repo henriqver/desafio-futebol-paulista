@@ -424,7 +424,7 @@ async function iniciar(comCamera){
     catch(e){ try{ S.stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}}); S.camOk=true }catch(e2){ S.stream=null } }
   }
   if(AU.ctx&&AU.dest&&S.stream&&S.stream.getAudioTracks().length){ AU.mic=AU.ctx.createMediaStreamSource(S.stream); AU.mic.connect(AU.dest) }
-  try{ await Promise.all([document.fonts.load('800 40px "Montserrat"'),document.fonts.load('600 20px "Montserrat"'),document.fonts.load('900 40px "Montserrat"')]) }catch(e){}
+  try{ await Promise.all(['500','600','700','800','900'].map(w=>document.fonts.load(`${w} 40px "Montserrat"`))) }catch(e){}
   if(NARR.indice&&AU.ctx) S.rodadas.forEach(r=>[...(r.falaSeg||[]), r.certa].forEach(x=>{ if(NARR.indice.has(slug(x))) bufferDe(x) }));
   S.rodadas.forEach(r=>{ if(r.imgKey) imgDe(r.imgKey); (r.badges||[]).forEach(b=>imgDe('clube:'+slug(b))); if(r.clube) imgDe('clube:'+slug(r.clube)); r.opcoes.forEach(o=>{imgDe('jogador:'+slug(o)); imgDe('clube:'+slug(o))}) });
   S.pausado=true; S.contagemAt=performance.now(); go('play');
@@ -523,6 +523,7 @@ function pararGravacao(){
    LAYOUT ADAPTATIVO (maior quando há pouca informação)
    ========================================================= */
 function setF(size,w=700,fam='Montserrat'){ g.font=`${w} ${size}px "${fam}", "Arial Narrow", sans-serif` }
+function largMax(ls,size,w=700,fam='Montserrat'){ setF(size,w,fam); return Math.max(0,...ls.map(l=>g.measureText(l).width)) }
 function quebrar(t,max,size,w=700,fam='Montserrat'){ setF(size,w,fam); const ls=[]; let l=''; for(const p of String(t).split(' ')){ const s=l?l+' '+p:p; if(g.measureText(s).width>max&&l){ls.push(l); l=p} else l=s } if(l) ls.push(l); return ls }
 function zona(){ const top=S.camOk?Math.round(H*.6):150; return {top, bot:H-36} }
 
@@ -540,16 +541,22 @@ function montarLayout(r,k){
   L.timer={x:X+pad, y:y+8, w:IW-80}; y+=28+8*k;
   if(r.clube){ const s=Math.min(150,96*k); L.clube={cx:W/2, y, s}; y+=s+12*k }
   if(r.imgKey){ const s=Math.min(IW, 300*k); L.img={x:W/2-s/2, y, s}; y+=s+12*k }
-  const ps=Math.round(42*k); const lines=quebrar(r.prompt,IW,ps); if(lines.length>4) L.okLinhas=false;
+  const ps=Math.round(42*k); const lines=quebrar(r.prompt,IW,ps); if(lines.length>4||largMax(lines,ps,700)>IW) L.okLinhas=false;
   L.prompt={lines, y:y+ps*.85, size:ps, lh:ps*1.08}; y+=lines.length*ps*1.08+6;
   y+=6*k;
   if(r.badges){
     const n=r.badges.length, porLinha=n<=4?n:Math.ceil(n/2), sep=34*k;
-    const b=Math.min((n<=2?170:n<=3?140:110)*k, (IW-(porLinha-1)*sep)/porLinha-22*k), slot=b+22*k, lab=Math.max(16,Math.round(21*k)), rowH=b+12*k+lab*1.25;
+    const b=Math.min((n<=2?170:n<=3?140:110)*k, (IW-(porLinha-1)*sep)/porLinha-22*k), slot=b+22*k, labW=slot+(porLinha<=2?sep*.8:0);
+    /* um único tamanho de fonte para todos os nomes da rodada, em até 2 linhas */
+    let lab=Math.max(14,Math.round(22*k));
+    const linhasDe=f=>r.badges.map(nm=>quebrar(nm,labW,f,700));
+    while(lab>14 && linhasDe(lab).some(ls=>ls.length>2||largMax(ls,lab,700)>labW)) lab--;
+    const labLinhas=linhasDe(lab), nLab=Math.max(...labLinhas.map(l=>l.length));
+    const rowH=b+12*k+lab*1.15*nLab;
     const rows=[]; r.badges.forEach((nome,i)=>{ if(i%porLinha===0) rows.push([]); rows.at(-1).push({nome,i}) });
     L.badges=[]; L.seps=[];
     rows.forEach((row,ri)=>{ const rw=row.length*slot+(row.length-1)*sep; let cx=W/2-rw/2+slot/2; const ry=y+ri*(rowH+14*k);
-      row.forEach((it,j)=>{ if(j>0||(ri>0)){ const sx= j>0 ? cx-slot/2-sep/2 : null; if(sx!==null) L.seps.push({x:sx, y:ry+b/2, i:it.i}) } L.badges.push({nome:it.nome, cx, y:ry, b, lab, slot, i:it.i}); cx+=slot+sep }) });
+      row.forEach((it,j)=>{ if(j>0||(ri>0)){ const sx= j>0 ? cx-slot/2-sep/2 : null; if(sx!==null) L.seps.push({x:sx, y:ry+b/2, i:it.i}) } L.badges.push({nome:it.nome, linhas:labLinhas[it.i], cx, y:ry, b, lab, slot, i:it.i}); cx+=slot+sep }) });
     L.seq=r.seq; y+=rows.length*rowH+(rows.length-1)*14*k+8*k;
   }
   L.card.h=y+pad-8*k;
@@ -557,8 +564,9 @@ function montarLayout(r,k){
   {
     const n=r.opcoes.length, av=!!r.avatares, longa=r.opcoes.some(o=>o.length>20);
     const cols=(!av&&r.opcoes.some(o=>o.length>30))?1:2, gap=12*k, ow=(CW-(cols-1)*gap)/cols, fs=Math.round((av?27:28)*k);
-    const linhas=r.opcoes.map(o=>quebrar(o, ow-(av?(64*k+40*k):36*k), fs, 600, 'Montserrat'));
-    const maxL=Math.max(...linhas.map(l=>l.length)); if(maxL>2) L.okLinhas=false;
+    const larg=ow-(av?(60*k+44*k):36*k);
+    const linhas=r.opcoes.map(o=>quebrar(o, larg, fs, 600, 'Montserrat'));
+    const maxL=Math.max(...linhas.map(l=>l.length)); if(maxL>2||linhas.some(ls=>largMax(ls,fs,600)>larg)) L.okLinhas=false;
     const oh=Math.max(av?84*k:0, 26*k+maxL*fs*1.15);
     L.opts=r.opcoes.map((o,i)=>({o, x:X+(i%cols)*(ow+gap), y:ay+Math.floor(i/cols)*(oh+gap), w:ow, h:oh, linhas:linhas[i], fs, av:av?60*k:0}));
     L.h=ay+Math.ceil(n/cols)*(oh+gap)-gap;
@@ -637,7 +645,7 @@ function escudo(nome,cx,y,b,{silh=false,alpha=1}={}){
   g.save(); g.globalAlpha*=alpha;
   if(im){
     if(!silh){ g.beginPath(); g.arc(cx,y+b/2,b/2,0,Math.PI*2); g.fillStyle='rgba(255,255,255,.94)'; g.fill() }
-    const s=silh?b:b*.74, iw=im.naturalWidth||im.width, ih=im.naturalHeight||im.height, sc=Math.min(s/iw,s/ih);
+    const s=silh?b:b*.64, iw=im.naturalWidth||im.width, ih=im.naturalHeight||im.height, sc=Math.min(s/iw,s/ih);
     g.drawImage(im,cx-iw*sc/2,y+b/2-ih*sc/2,iw*sc,ih*sc);
   } else {
     g.beginPath(); g.arc(cx,y+b/2,b/2,0,Math.PI*2); g.fillStyle=corDe(nome); g.fill(); g.lineWidth=4; g.strokeStyle='rgba(255,255,255,.55)'; g.stroke();
@@ -691,7 +699,7 @@ function rodada(now){
     L.seps.forEach(s=>{ const a=clamp01((te-260-s.i*110)/250); g.globalAlpha=a; txt(L.seq?'›':'+',s.x,s.y+4,46*L.k,{w:800,cor:C.placar,align:'center',base:'middle'}); g.globalAlpha=1 });
     L.badges.forEach(b=>{ const p=RM?1:easeBack((te-200-b.i*110)/380); if(p<=0) return;
       g.save(); g.translate(b.cx,b.y+b.b/2); g.scale(p,p); escudo(b.nome,0,-b.b/2,b.b); g.restore();
-      g.globalAlpha=clamp01(p); const fs=caber(b.nome,b.slot,b.lab,700); txt(b.nome,b.cx,b.y+b.b+10*L.k+fs,fs,{w:700,align:'center',cor:C.giz}); g.globalAlpha=1 });
+      g.globalAlpha=clamp01(p); b.linhas.forEach((ln,q)=>txt(ln,b.cx,b.y+b.b+10*L.k+b.lab*(1+q*1.15),b.lab,{w:700,align:'center',cor:C.giz})); g.globalAlpha=1 });
   }
   // alternativas
   {
