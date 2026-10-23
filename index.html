@@ -107,7 +107,7 @@ video.preview{width:100%; border-radius:18px; background:#000; aspect-ratio:9/16
 <body>
 <div class="app" id="app"></div>
 <div class="sr" aria-live="polite" id="sr"></div>
-<script src="js/dados.js?v=2026-10-25"></script>
+<script src="js/dados.js?v=2026-10-26"></script>
 <script>
 
 /* =========================================================
@@ -118,7 +118,7 @@ const ICONS = {
   'dois-clubes':'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="15" cy="20" r="10"/><circle cx="25" cy="20" r="10"/></svg>',
   intruso:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="12" r="4"/><circle cx="20" cy="12" r="4"/><circle cx="31" cy="12" r="4"/><circle cx="9" cy="28" r="4"/><circle cx="20" cy="28" r="4"/><path d="M28 24l7 8M35 24l-7 8"/></svg>',
   escudo:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 4l13 5v10c0 9-6 14-13 17C13 33 7 28 7 19V9z"/><path d="M20 15v8M20 27v1"/></svg>',
-  silhueta:'<svg viewBox="0 0 40 40" fill="currentColor"><circle cx="20" cy="12" r="7"/><path d="M6 37c1-9 7-14 14-14s13 5 14 14z"/></svg>',
+  escalacao:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="4" width="30" height="32" rx="3"/><path d="M5 20h30"/><circle cx="20" cy="20" r="4"/><circle cx="20" cy="31" r="1.6" fill="currentColor"/><circle cx="12" cy="25" r="1.6" fill="currentColor"/><circle cx="28" cy="25" r="1.6" fill="currentColor"/><circle cx="14" cy="12" r="1.6" fill="currentColor"/><circle cx="26" cy="12" r="1.6" fill="currentColor"/></svg>',
   quiz:'<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="6" width="30" height="28" rx="4"/><path d="M15 15a5 5 0 1 1 6 5c-1 .4-1 1.2-1 2.5M20 27v1"/></svg>'
 };
 const ICON_SHARE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>';
@@ -127,10 +127,16 @@ const GAMES = [
   {id:'dois-clubes', nome:'Jogou em todos', tempo:20},
   {id:'intruso', nome:'Quem é o intruso?', tempo:20},
   {id:'escudo', nome:'Adivinhe o escudo', tempo:20},
-  {id:'silhueta', nome:'Adivinhe pela silhueta', tempo:20},
+  {id:'escalacao', nome:'Escalação campeã', tempo:20},
   {id:'quiz', nome:'Quiz do futebol paulista', tempo:20}
 ];
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* PONTUAÇÃO: até 10 por rodada (0 a 100 na partida). Acerto: 5 + até 5 pela rapidez (a curva valoriza quem responde logo).
+   Erro: 0. Com SEGUNDA_CHANCE = true, o acerto na segunda tentativa vale PONTOS_2A_TENTATIVA. */
+const SEGUNDA_CHANCE = false;
+const PONTOS_2A_TENTATIVA = 1.5;
+const pontosAcerto = (restanteSeg,total) => Math.round((5+5*Math.pow(Math.max(0,restanteSeg)/total,1.5))*10)/10;
+const fmtPts = n => (Math.round(n*10)/10).toLocaleString('pt-BR',{minimumFractionDigits:1, maximumFractionDigits:1});
 
 /* utilidades */
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -241,6 +247,17 @@ function montarRodadas(id){
   if(id==='intruso') return rodadasIntruso();
   if(id==='quiz') return shuffle(DB.quiz).slice(0,10).map(c=>({prompt:c.q, opcoes:shuffle(c.opcoes), certa:c.certa, fala:c.q, falaSeg:[c.q]}));
   if(id==='escudo'){ const P=POOL.escudo||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'De qual clube é este escudo?', imgKey:'clube:'+slug(n), generico:'escudo', opcoes:shuffle([n,...outros(P,n)]), certa:n, respKey:'clube:'+slug(n), fala:'De qual clube é este escudo?', falaSeg:['De qual clube é este escudo?'], falaCurta:'', falaSegCurta:[]})) }
+  if(id==='escalacao') return shuffle(DB.escalacoes).slice(0,10).map(e=>{
+    const k=Math.random()*11|0, certa=e.titulares[k];
+    const fora=n=>!e.titulares.includes(n)&&n!==certa;
+    let err=shuffle(e.reservas.filter(fora)).slice(0,3);
+    if(err.length<3) err=err.concat(shuffle((DB.porClube.get(e.time)||[]).map(j=>j.nome).filter(n=>fora(n)&&!err.includes(n))).slice(0,3-err.length));
+    if(err.length<3) err=err.concat(shuffle(DB.jogadores.map(j=>j.nome).filter(n=>fora(n)&&!err.includes(n))).slice(0,3-err.length));
+    const art=artigo(e.time);
+    return {prompt:`Quem falta ${art} ${e.time} campeão de ${e.ano}?`, campo:{time:e.time, titulares:e.titulares, linhas:e.linhas, falta:k}, opcoes:shuffle([certa,...err]), avatares:true, certa, respKey:'jogador:'+slug(certa),
+      fala:`Quem falta ${art} ${pronuncia(e.time)} campeão de ${e.ano}?`, falaSeg:[`Quem falta ${art}`, e.time, `campeão de ${e.ano}`],
+      falaCurta:`${pronuncia(e.time)}, campeão de ${e.ano}`, falaSegCurta:[e.time, `campeão de ${e.ano}`]};
+  });
   if(id==='silhueta'){ const P=POOL.silhueta||[]; return shuffle(P).slice(0,10).map(n=>({prompt:'Quem é este jogador?', imgKey:'jogador:'+slug(n), generico:'jogador', opcoes:shuffle([n,...outros(P,n)]), avatares:false, certa:n, respKey:'jogador:'+slug(n), fala:'Quem é este jogador?', falaSeg:['Quem é este jogador?'], falaCurta:'', falaSegCurta:[]})) }
   return [];
 }
@@ -361,7 +378,7 @@ function tabelaRanking(lista, voce){
   if(!linhas.length) return '<p class="note">O ranking deste desafio ainda não foi publicado.</p>';
   return `<table class="rank">${linhas.map((r,k)=>`<tr class="${r.voce?'voce':''} entra" style="--d:${.1+k*.07}s"><td>${k+1}</td>
     <td>${esc(r.nome)}${r.video?` <a href="${esc(r.video)}" target="_blank" rel="noopener">vídeo</a>`:''}</td>
-    <td>${fmt(r.pontos)}</td></tr>`).join('')}</table>`;
+    <td>${fmtPts(r.pontos)}</td></tr>`).join('')}</table>`;
 }
 
 function renderIntro(){
@@ -426,7 +443,7 @@ async function iniciar(comCamera){
   if(AU.ctx&&AU.dest&&S.stream&&S.stream.getAudioTracks().length){ AU.mic=AU.ctx.createMediaStreamSource(S.stream); AU.mic.connect(AU.dest) }
   try{ await Promise.all(['500','600','700','800','900'].map(w=>document.fonts.load(`${w} 40px "Montserrat"`))) }catch(e){}
   if(NARR.indice&&AU.ctx) S.rodadas.forEach(r=>[...(r.falaSeg||[]), r.certa].forEach(x=>{ if(NARR.indice.has(slug(x))) bufferDe(x) }));
-  S.rodadas.forEach(r=>{ if(r.imgKey) imgDe(r.imgKey); (r.badges||[]).forEach(b=>imgDe('clube:'+slug(b))); if(r.clube) imgDe('clube:'+slug(r.clube)); r.opcoes.forEach(o=>{imgDe('jogador:'+slug(o)); imgDe('clube:'+slug(o))}) });
+  S.rodadas.forEach(r=>{ if(r.campo) imgDe('clube:'+slug(r.campo.time)); if(r.imgKey) imgDe(r.imgKey); (r.badges||[]).forEach(b=>imgDe('clube:'+slug(b))); if(r.clube) imgDe('clube:'+slug(r.clube)); r.opcoes.forEach(o=>{imgDe('jogador:'+slug(o)); imgDe('clube:'+slug(o))}) });
   S.pausado=true; S.contagemAt=performance.now(); go('play');
   comecarGravacao();
   for(let n=0;n<3;n++){ SFX.beep(); await espera(RM?400:850); if(S.abortado) return }
@@ -456,20 +473,20 @@ function responder(valor){
   const certo = valor===r.certa;
   const now=performance.now();
   if(certo){
-    const pts=(S.tentativa===1?1000:500)+Math.round((S.tentativa===1?500:250)*left/S.game.tempo);
+    const pts=S.tentativa===1 ? pontosAcerto(left,S.game.tempo) : PONTOS_2A_TENTATIVA;
     S.pontos+=pts; S.log.push({ok:true, t:S.tentativa, seg:S.game.tempo-left});
-    S.fb={k:'ok', t:'Acertou!', at:now}; S.pop={t:'+'+fmt(pts), at:now}; confete(); SFX.acerto(); sr.textContent=`Acertou: ${r.certa}. Mais ${pts} pontos.`;
+    S.fb={k:'ok', t:'Acertou!', at:now}; S.pop={t:'+'+fmtPts(pts), at:now}; confete(); SFX.acerto(); sr.textContent=`Acertou: ${r.certa}. Mais ${fmtPts(pts)} pontos.`;
     posicionarOverlays();
     /* a próxima rodada só começa depois de o nome ser lido */
     Promise.all([espera(1300), espera(250).then(()=>falar(pronuncia(r.certa),[r.certa]))]).then(proxima);
-  } else if(S.tentativa===1){
+  } else if(S.tentativa===1 && SEGUNDA_CHANCE){
     if(valor) S.desabilitadas.push(valor);
     S.fb={k:'retry', t: valor==null?'Tempo! Mais uma chance':'Errou! Mais uma chance', at:now}; S.shakeAt=now; SFX.erro(); sr.textContent=S.fb.t;
     posicionarOverlays();
     setTimeout(()=>{ if(S.tela!=='play') return; S.tentativa=2; S.fb=null; posicionarOverlays(); ligarRelogio() },1100);
   } else {
     if(valor) S.desabilitadas.push(valor);
-    S.log.push({ok:false}); S.fb={k:'miss', t:'Era: '+r.certa, at:now}; S.shakeAt=now; SFX.perdeu(); sr.textContent='Resposta: '+r.certa;
+    S.log.push({ok:false}); S.fb={k:'miss', t:(valor==null?'Tempo! ':'')+'Era: '+r.certa, at:now}; S.shakeAt=now; SFX.perdeu(); sr.textContent='Resposta: '+r.certa;
     posicionarOverlays(); setTimeout(proxima,2000);
   }
 }
@@ -483,7 +500,7 @@ function posicaoNoRanking(){ const l=RANKING_FIXO[S.game.id]||[]; return l.filte
 async function finalizar(){
   S.final=true; S.finalAt=performance.now(); S.layout=null; clearInterval(tick); musicaDesliga(); posicionarOverlays();
   SFX.fanfarra(); const ac=S.log.filter(l=>l.ok).length;
-  falar(`Fim de jogo! Você fez ${fmt(S.pontos)} pontos e acertou ${ac} de ${S.rodadas.length}.`, ['Fim de jogo!']);
+  falar(`Fim de jogo! Você fez ${fmtPts(S.pontos)} pontos e acertou ${ac} de ${S.rodadas.length}.`, ['Fim de jogo!']);
   const linhas=linhasRankingFinal().length;
   for(let k=0;k<linhas;k++){ setTimeout(()=>{ if(S.tela==='play') SFX.pop() }, 2200+k*260) }
   await espera(2600+linhas*260+2600);
@@ -525,11 +542,12 @@ function pararGravacao(){
 function setF(size,w=700,fam='Montserrat'){ g.font=`${w} ${size}px "${fam}", "Arial Narrow", sans-serif` }
 function largMax(ls,size,w=700,fam='Montserrat'){ setF(size,w,fam); return Math.max(0,...ls.map(l=>g.measureText(l).width)) }
 function quebrar(t,max,size,w=700,fam='Montserrat'){ setF(size,w,fam); const ls=[]; let l=''; for(const p of String(t).split(' ')){ const s=l?l+' '+p:p; if(g.measureText(s).width>max&&l){ls.push(l); l=p} else l=s } if(l) ls.push(l); return ls }
-function zona(){ const top=S.camOk?Math.round(H*.6):150; return {top, bot:H-36} }
+/* com câmera, o conteúdo fica no terço final; o campinho da escalação precisa de mais espaço */
+function zona(r){ const top=S.camOk?Math.round(H*(r&&r.campo?.4:.6)):150; return {top, bot:H-36} }
 
 function calcularLayout(r){
   if(!r) return null;
-  const z=zona(), alt=z.bot-z.top;
+  const z=zona(r), alt=z.bot-z.top;
   let L=null;
   for(let k=1.4;k>=.55;k-=.05){ L=montarLayout(r,k); if(L.h<=alt&&L.okLinhas) break }
   const sobra=Math.max(0,alt-L.h); L.y0=z.top+sobra*(S.camOk?1:.5);
@@ -544,6 +562,18 @@ function montarLayout(r,k){
   const ps=Math.round(42*k); const lines=quebrar(r.prompt,IW,ps); if(lines.length>4||largMax(lines,ps,700)>IW) L.okLinhas=false;
   L.prompt={lines, y:y+ps*.85, size:ps, lh:ps*1.08}; y+=lines.length*ps*1.08+6;
   y+=6*k;
+  if(r.campo){
+    const fw=IW, fh=Math.min(fw*1.02, 600*k), lin=r.campo.linhas, nrow=lin.length, maxPor=Math.max(...lin);
+    const sh=Math.min(fw/(maxPor+1.2)*.78, fh/(nrow*1.75)), colW=fw/maxPor-6;
+    let lab=Math.max(12,Math.round(19*k));
+    const ls=f=>r.campo.titulares.map(nm=>quebrar(nm,colW,f,700));
+    while(lab>12 && ls(lab).some(l=>l.length>2||largMax(l,lab,700)>colW)) lab--;
+    const linhas=ls(lab), pos=[]; let idx=0;
+    lin.forEach((q,ri)=>{ const yy=fh-(fh/nrow)*(ri+.5)-lab*.6; for(let c=0;c<q;c++){ pos.push({cx:X+pad+fw*(c+.5)/q, cy:y+yy, nome:r.campo.titulares[idx], linhas:linhas[idx], i:idx}); idx++ } });
+    L.campo={x:X+pad, y, w:fw, h:fh, sh, lab, pos};
+    if(sh<34) L.okLinhas=false;
+    y+=fh+10*k;
+  }
   if(r.badges){
     const n=r.badges.length, porLinha=n<=4?n:Math.ceil(n/2), sep=34*k;
     const b=Math.min((n<=2?170:n<=3?140:110)*k, (IW-(porLinha-1)*sep)/porLinha-22*k), slot=b+22*k, labW=slot+(porLinha<=2?sep*.8:0);
@@ -636,10 +666,21 @@ function hud(now){
       if(l) cor=l.ok?C.acerto:C.erro; else if(i===S.i&&!S.contagemAt){ cor=C.placar; r=5.5+(RM?0:Math.sin(now/180)*1.5) }
       g.beginPath(); g.arc(x0+i*20,128,r,0,Math.PI*2); g.fillStyle=cor; g.fill() });
   }
-  const t=fmt(S.disp); setF(34,900); const w=g.measureText(t).width+40;
+  const t=fmtPts(S.disp); setF(34,900); const w=g.measureText(t).width+40;
   rr(W-30-w,38,w,56,28); g.fillStyle=C.vidro; g.fill(); txt(t,W-50,78,34,{w:900,cor:C.placar,align:'right'});
 }
 
+/* camisa genérica com o escudo do clube no peito */
+function camisa(cx,cy,s,{time,falta=false,certo=false,errado=false}={}){
+  const P=[[-.18,-.46],[-.5,-.3],[-.4,-.04],[-.29,-.12],[-.29,.46],[.29,.46],[.29,-.12],[.4,-.04],[.5,-.3],[.18,-.46]];
+  g.beginPath(); g.moveTo(cx+P[0][0]*s,cy+P[0][1]*s); P.slice(1).forEach(([x,y])=>g.lineTo(cx+x*s,cy+y*s)); g.quadraticCurveTo(cx,cy-.28*s,cx-.18*s,cy-.46*s); g.closePath();
+  g.fillStyle = falta ? C.placar : certo ? C.acerto : errado ? C.erro : 'rgba(255,255,255,.95)'; g.fill();
+  g.lineWidth=2; g.strokeStyle = falta ? '#fff' : 'rgba(0,0,60,.35)'; g.stroke();
+  if(falta){ txt('?',cx,cy+.04*s,s*.5,{w:900,align:'center',base:'middle',cor:'#fff'}); return }
+  const im=imgDe('clube:'+slug(time));
+  if(im){ const iw=im.naturalWidth||im.width, ih=im.naturalHeight||im.height, t=s*.3, sc=Math.min(t/iw,t/ih); g.drawImage(im,cx-iw*sc/2,cy-.1*s-ih*sc/2,iw*sc,ih*sc) }
+  else txt(iniciais(time),cx,cy-.08*s,s*.2,{w:800,align:'center',base:'middle',cor:C.campo});
+}
 function escudo(nome,cx,y,b,{silh=false,alpha=1}={}){
   const key='clube:'+slug(nome), im=silh?silhuetaDe(key):imgDe(key);
   g.save(); g.globalAlpha*=alpha;
@@ -694,6 +735,27 @@ function rodada(now){
   }
   // pergunta
   const P=L.prompt; P.lines.forEach((l,i)=>{ const a=clamp01((te-120-i*60)/300); g.globalAlpha=RM?1:a; txt(l,W/2,P.y+i*P.lh+(RM?0:(1-ease(a))*14),P.size,{w:700,align:'center'}) }); g.globalAlpha=1;
+  // campinho com a escalação
+  if(L.campo){
+    const F=L.campo, a=RM?1:clamp01((te-150)/400);
+    g.save(); g.globalAlpha=a;
+    rr(F.x,F.y,F.w,F.h,18); g.fillStyle='rgba(0,0,60,.42)'; g.fill(); g.strokeStyle='rgba(255,255,255,.35)'; g.lineWidth=2; g.stroke();
+    g.beginPath(); g.moveTo(F.x,F.y+F.h/2); g.lineTo(F.x+F.w,F.y+F.h/2); g.stroke();
+    g.beginPath(); g.arc(F.x+F.w/2,F.y+F.h/2,F.w*.12,0,Math.PI*2); g.stroke();
+    const aw=F.w*.46, ah=F.h*.12; g.strokeRect(F.x+(F.w-aw)/2,F.y+F.h-ah,aw,ah); g.strokeRect(F.x+(F.w-aw)/2,F.y,aw,ah);
+    g.restore();
+    F.pos.forEach(pp=>{
+      const p=RM?1:easeBack((te-250-pp.i*55)/360); if(p<=0) return;
+      const falta = pp.i===r.campo.falta, mostrar = falta && revela;
+      g.save(); g.translate(pp.cx,pp.cy); g.scale(p,p);
+      camisa(0,0,F.sh,{time:r.campo.time, falta: falta && !revela, certo: mostrar && fb.k==='ok', errado: mostrar && fb.k==='miss'});
+      g.restore();
+      const ls = falta ? (revela ? quebrar(r.certa, F.w/5, F.lab, 700) : ['?']) : pp.linhas;
+      g.globalAlpha=clamp01(p);
+      ls.forEach((ln,q)=>txt(ln,pp.cx,pp.cy+F.sh*.62+F.lab*(1+q*1.1),F.lab,{w:700,align:'center',cor: falta ? (revela?(fb.k==='ok'?C.acerto:C.erro):C.placar) : C.giz}));
+      g.globalAlpha=1;
+    });
+  }
   // escudos em sequência
   if(L.badges){
     L.seps.forEach(s=>{ const a=clamp01((te-260-s.i*110)/250); g.globalAlpha=a; txt(L.seq?'›':'+',s.x,s.y+4,46*L.k,{w:800,cor:C.placar,align:'center',base:'middle'}); g.globalAlpha=1 });
@@ -768,7 +830,7 @@ function finalQuadro(now){
   const p0=RM?1:easeBack(t/.5);
   g.save(); g.translate(W/2,top+50); g.scale(p0,p0); txt('FIM DE JOGO!',0,0,54,{w:900,align:'center',base:'middle'}); g.restore();
   const cont=RM?1:ease((t-.5)/1.3), vs=S.pontos*cont;
-  if(t>.4){ txt(fmt(vs),W/2,top+170,112,{w:900,cor:C.placar,align:'center',base:'middle'}); txt('pontos',W/2,top+238,30,{w:600,fam:'Montserrat',cor:C.sub,align:'center',base:'middle'}) }
+  if(t>.4){ txt(fmtPts(vs),W/2,top+170,112,{w:900,cor:C.placar,align:'center',base:'middle'}); txt('pontos',W/2,top+238,30,{w:600,fam:'Montserrat',cor:C.sub,align:'center',base:'middle'}) }
   const ac=S.log.filter(l=>l.ok).length;
   if(t>1.8){ g.globalAlpha=clamp01((t-1.8)/.4); txt(`${ac} de ${S.rodadas.length} acertos`,W/2,top+292,36,{w:700,align:'center',base:'middle'}); g.globalAlpha=1 }
   const linhas=linhasRankingFinal(); if(linhas.length<=1){ return }
@@ -781,7 +843,7 @@ function finalQuadro(now){
     const cor=C.giz, my=y+(rowH-8)/2+2;
     txt(l.pos+'º',x+22,my,34,{w:800,cor,base:'middle'});
     const nf=caber(l.nome,w-260,30,700); txt(l.nome,x+90,my,nf,{w:700,cor,base:'middle'});
-    txt(fmt(l.pontos),x+w-22,my,32,{w:800,cor,align:'right',base:'middle'});
+    txt(fmtPts(l.pontos),x+w-22,my,32,{w:800,cor,align:'right',base:'middle'});
     g.restore();
   });
 }
@@ -790,7 +852,7 @@ function confete(){ if(RM) return; const L=S.layout; const cy=L?L.y0+40:H/2; for
 function desenhar(now,dt){
   g.setTransform(ESC,0,0,ESC,0,0);
   fundo(now);
-  S.disp+=(S.pontos-S.disp)*Math.min(1,dt*7); if(Math.abs(S.pontos-S.disp)<1) S.disp=S.pontos;
+  S.disp+=(S.pontos-S.disp)*Math.min(1,dt*7); if(Math.abs(S.pontos-S.disp)<.05) S.disp=S.pontos;
   hud(now);
   if(S.final) finalQuadro(now); else if(S.contagemAt) contagem(now); else rodada(now);
   if(S.pop){ const p=(now-S.pop.at)/1100; if(p<1){ const L=S.layout; const y=(L?L.y0:H/2)-30-ease(p)*90; g.globalAlpha=1-Math.max(0,(p-.6)/.4); txt(S.pop.t,W/2,y,78*(RM?1:(.8+easeBack(p*2.5)*.2)),{w:800,cor:C.placar,align:'center',base:'middle'}); g.globalAlpha=1 } else S.pop=null }
@@ -813,7 +875,7 @@ async function salvar(msg){
 async function compartilhar(msg){
   const f=arquivoVideo(); let pode=false; try{ pode=!!(navigator.canShare&&navigator.canShare({files:[f]})) }catch(e){}
   if(pode){
-    try{ await navigator.share({files:[f], title:'Desafio Futebol Paulista', text:`Fiz ${fmt(S.pontos)} pontos no "${S.game.nome}". Duvido você fazer mais!`}); msg('Compartilhado!'); return }
+    try{ await navigator.share({files:[f], title:'Desafio Futebol Paulista', text:`Fiz ${fmtPts(S.pontos)} pontos no "${S.game.nome}". Duvido você fazer mais!`}); msg('Compartilhado!'); return }
     catch(e){ if(e&&e.name==='AbortError'){ msg('Compartilhamento cancelado.'); return } }
   }
   msg('Este navegador não abre o compartilhamento direto de vídeo. Vamos salvar o arquivo para você postar.');
@@ -836,7 +898,7 @@ function renderResult(){
     <div class="row"><button class="btn sec" id="denovo">Jogar de novo</button><button class="btn sec" id="inicio">Outros desafios</button></div>
   </div>`;
   const big=document.getElementById('big'), t0=performance.now(), alvo=S.pontos;
-  const conta=now=>{ const p=RM?1:ease((now-t0)/1200); big.textContent=fmt(alvo*p); if(p<1) requestAnimationFrame(conta) }; requestAnimationFrame(conta);
+  const conta=now=>{ const p=RM?1:ease((now-t0)/1200); big.textContent=fmtPts(alvo*p); if(p<1) requestAnimationFrame(conta) }; requestAnimationFrame(conta);
   const msg=m=>{ const e=document.getElementById('msg'); if(e) e.textContent=m };
   if(S.video){ document.getElementById('share').onclick=()=>compartilhar(msg); document.getElementById('salvar').onclick=()=>salvar(msg) }
   document.getElementById('denovo').onclick=()=>go('intro');
