@@ -78,8 +78,8 @@ async function carregarDados(){
   esc.forEach(r=>{ const c=col(r,'Clube'), a=col(r,'Arquivo'); if(c&&a){ DB.mapaEscudos[slug(clubeOk(c))]=a; DB.clubesComEscudo.push(clubeOk(c)) } });
 }
 /* Imagens: tenta o nome registrado em escudos.csv (aceita alternativas separadas por "|")
-   e o nome padrão, com as extensões .png, .PNG, .jpg, .jpeg e .webp */
-const EXTS=['.png','.PNG','.jpg','.jpeg','.webp'];
+   e o nome padrão, com as extensões .png, .PNG, .jpg, .jpeg, .webp e .svg */
+const EXTS=['.png','.PNG','.jpg','.jpeg','.webp','.svg'];
 function nomesBase(key){
   const [tipo,id]=key.split(':');
   const reg=tipo==='clube'&&DB.mapaEscudos[id] ? DB.mapaEscudos[id].split('|').map(x=>x.trim()).filter(Boolean) : [];
@@ -87,7 +87,7 @@ function nomesBase(key){
 }
 function candidatos(key){
   const pasta=key.startsWith('clube:')?CONFIG.pastaEscudos:CONFIG.pastaFotos, out=[];
-  nomesBase(key).forEach(b=>{ if(/\.(png|jpe?g|webp)$/i.test(b)) out.push(b); else EXTS.forEach(e=>out.push(b+e)) });
+  nomesBase(key).forEach(b=>{ if(/\.(png|jpe?g|webp|svg)$/i.test(b)) out.push(b); else EXTS.forEach(e=>out.push(b+e)) });
   return [...new Set(out)].map(f=>pasta+encodeURIComponent(f.normalize('NFC')));
 }
 const IMGS=new Map();
@@ -95,7 +95,7 @@ function carregarImagem(key){
   if(IMGS.has(key)) return IMGS.get(key);
   const p=(async()=>{
     for(const u of candidatos(key)){
-      const im=await new Promise(res=>{ const i=new Image(); const t=setTimeout(()=>res(null),8000);
+      const im = /\.svg$/i.test(u) ? await carregarSVG(u) : await new Promise(res=>{ const i=new Image(); const t=setTimeout(()=>res(null),8000);
         i.onload=()=>{clearTimeout(t); res(i)}; i.onerror=()=>{clearTimeout(t); res(null)}; i.src=u });
       if(im) return {im, url:u};
     }
@@ -104,6 +104,20 @@ function carregarImagem(key){
   IMGS.set(key,p); return p;
 }
 const existe = key => carregarImagem(key).then(r=>!!r);
+/* SVG sem largura/altura fixas não tem tamanho definido no canvas: define um tamanho a partir do viewBox */
+async function carregarSVG(url){
+  try{
+    const r=await fetch(url); if(!r.ok) return null;
+    let t=await r.text(); const m=t.match(/<svg\b[^>]*>/i); if(!m) return null;
+    const tag=m[0], vb=tag.match(/viewBox\s*=\s*["']\s*([-\d.e]+)[\s,]+([-\d.e]+)[\s,]+([-\d.e]+)[\s,]+([-\d.e]+)/i);
+    if(vb && +vb[3]>0 && +vb[4]>0){
+      const k=512/Math.max(+vb[3],+vb[4]), w=Math.round(+vb[3]*k), h=Math.round(+vb[4]*k);
+      t=t.replace(tag, tag.replace(/\s(width|height)\s*=\s*["'][^"']*["']/gi,'').replace(/<svg\b/i,`<svg width="${w}" height="${h}"`));
+    }
+    const src=URL.createObjectURL(new Blob([t],{type:'image/svg+xml'}));
+    return await new Promise(res=>{ const i=new Image(); i.onload=()=>res(i.naturalWidth?i:null); i.onerror=()=>res(null); i.src=src });
+  }catch(e){ return null }
+}
 async function filtrarComImagem(tipo, nomes){ const ok=await Promise.all(nomes.map(n=>existe(tipo+':'+slug(n)))); return nomes.filter((_,i)=>ok[i]) }
 
 /* semelhança entre clubes: mesmo clube 4; mesmo estado (Brasil) ou mesmo país (exterior) 3; mesma região 2; Brasil, estados diferentes 1 */
