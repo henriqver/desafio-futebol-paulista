@@ -59,8 +59,16 @@ async function carregarDados(){
   escal.forEach((r,i)=>{ const time=clubeOk(col(r,'Time')), ano=col(r,'Ano'), tit=lista(col(r,'Escalação','Escalacao','Titulares')), res=lista(col(r,'Substitutos','Reservas'));
     if(!time||!ano) return;
     if(tit.length!==11){ DB.problemas.push(`Escalações, linha ${i+2} (${time} ${ano}): ${tit.length} titulares (o certo são 11).`); return }
-    const esq=(col(r,'Esquema')||'').split('-').map(Number).filter(n=>n>0);
-    DB.escalacoes.push({ano, time, titulares:tit, reservas:res, linhas: esq.reduce((a,b)=>a+b,0)===10 ? [1,...esq] : [1,4,3,3]}) });
+    /* formatos aceitos: "Nome [LD x83 y32]" (posição e coordenadas do campinho), "LD:Nome" ou só "Nome" */
+    const itens=tit.map(t=>{
+      let m=t.match(/^(.*?)\s*\[\s*([A-Za-z]{2,4})\s+x\s*([\d.]+)\s+y\s*([\d.]+)\s*\]$/);
+      if(m) return {nome:m[1].trim(), cod:m[2].toUpperCase(), x:+m[3], y:+m[4]};
+      m=t.match(/^([A-Za-z]{2,4})\s*:\s*(.+)$/); return m?{cod:m[1].toUpperCase(), nome:m[2].trim()}:{cod:'', nome:t};
+    });
+    const nomeLimpo = t => t.replace(/\s*\[.*\]\s*$/,'').replace(/^[A-Za-z]{2,4}\s*:\s*/,'').trim();
+    const esqTxt=(col(r,'Formação','Formacao','Esquema')||'').match(/\d(-\d)+/), esq=esqTxt?esqTxt[0].split('-').map(Number):[];
+    DB.escalacoes.push({ano, time, jogo:col(r,'Jogo'), titulares:itens.map(x=>x.nome), reservas:res.map(nomeLimpo).filter(Boolean),
+      slots: itens.every(x=>x.x!=null) ? itens.map(x=>({px:x.x/100, py:x.y/100})) : posicoesEscalacao(itens, esq.reduce((a,b)=>a+b,0)===10 ? [1,...esq] : [1,4,3,3])}) });
   clu.forEach(r=>{ const c=col(r,'Clube'); if(c) DB.clubeInfo[slug(clubeOk(c))]={pais:col(r,'País','Pais'), uf:col(r,'Estado','UF')} });
   const vistos=new Set();
   jog.forEach((r,i)=>{
@@ -146,4 +154,25 @@ function naoJogouEm(j,c){
   const paulista = DB.porClube.has(c) || infoClube(c).uf==='SP';
   if(paulista) return !j.paulistas.includes(c) && !j.carreira.includes(c);
   return j.carreira.length>0 && !j.carreira.includes(c);
+}
+
+/* Posições no campinho (visto com o ataque para cima). Com códigos de posição (GOL, LD, ZAG, LE, VOL, MEI, MD, ME, ATA, PD, PE...)
+   cada jogador vai para a sua linha e para o seu lado. Sem códigos, usa o esquema (padrão 4-3-3) e lê cada linha da direita para a esquerda (LD primeiro). */
+const POS = {GOL:[0,0], LD:[1,1], LAD:[1,1], ZAD:[1,.5], ZAG:[1,0], ZC:[1,0], ZAE:[1,-.5], LE:[1,-1], LAE:[1,-1],
+  VOL:[2,0], ALD:[3,1], MD:[3,1], MEI:[3,0], MC:[3,0], MEC:[3,0], ME:[3,-1], ALE:[3,-1], PD:[4,1], ATA:[4,0], CA:[4,0], SA:[4,0], PE:[4,-1]};
+function posicoesEscalacao(itens, esquema){
+  const comCod = itens.every(x=>POS[x.cod]);
+  const linhas = [];
+  if(comCod){
+    itens.forEach((x,i)=>{ const [ln,lado]=POS[x.cod]; (linhas[ln]=linhas[ln]||[]).push({i,lado}) });
+  } else {
+    let i=0; esquema.forEach((q,ln)=>{ linhas[ln]=[]; for(let c=0;c<q;c++,i++) linhas[ln].push({i, lado:0, ordem:c}) });
+  }
+  const usadas=linhas.filter(Boolean), out=[];
+  usadas.forEach((ln,ri)=>{
+    // da esquerda para a direita: lado esquerdo primeiro; entre os do centro, o listado primeiro fica mais à direita
+    const ord = ln.map((x,k)=>({...x,k})).sort((a,b)=> a.lado-b.lado || b.k-a.k);
+    ord.forEach((x,c)=>out[x.i]={px:(c+.5)/ord.length, py:.12+.78*ri/Math.max(1,usadas.length-1)});
+  });
+  return out;
 }
