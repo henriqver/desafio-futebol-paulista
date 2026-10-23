@@ -107,7 +107,7 @@ video.preview{width:100%; border-radius:18px; background:#000; aspect-ratio:9/16
 <body>
 <div class="app" id="app"></div>
 <div class="sr" aria-live="polite" id="sr"></div>
-<script src="js/dados.js?v=2026-10-24"></script>
+<script src="js/dados.js?v=2026-10-25"></script>
 <script>
 
 /* =========================================================
@@ -223,7 +223,9 @@ async function prepararPool(id){
   if(id==='escudo'){
     /* só clubes de São Paulo: arquivo registrado em escudos.csv terminando em " - SP" */
     const deSP = nome => (DB.mapaEscudos[slug(nome)]||'').split('|').some(f=>/\s-\s*SP\s*(\(\d+\))?(\.[a-z]+)?$/i.test(f.trim()));
-    const paulistas=[...new Set(DB.clubesComEscudo)].filter(deSP);
+    /* clubes que usam o mesmo arquivo de escudo (ex.: Red Bull Brasil e Red Bull Bragantino) entram uma vez só, com o primeiro nome do escudos.csv */
+    const vistoArq=new Set();
+    const paulistas=[...new Set(DB.clubesComEscudo)].filter(deSP).filter(c=>{ const a=(DB.mapaEscudos[slug(c)]||'').split('|')[0].trim().toLowerCase(); if(vistoArq.has(a)) return false; vistoArq.add(a); return true });
     const ok=await filtrarComImagem('clube',paulistas);
     POOL.escudo = ok.length>=4 ? ok : [...DB.porClube.keys()];
   } else {
