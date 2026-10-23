@@ -10,6 +10,7 @@ const CONFIG = {
   ranking:   'dados/ranking.csv',     // Jogo, Nome, Pontos, Link do vídeo
   escudos:   'dados/escudos.csv',     // (opcional) Clube, Arquivo — para usar nomes de arquivo diferentes do padrão
   clubes:    'dados/clubes.csv',      // Clube, País, Estado — usado para montar alternativas erradas parecidas
+  escalacoes:'dados/escalacoes.csv',  // Ano; Time; Escalação (11 titulares, do goleiro ao ataque); Substitutos; Esquema (opcional, ex.: 4-3-3)
   pastaEscudos: 'escudos/',           // padrão: escudos/<nome-do-clube>.png   (ex.: escudos/sao-paulo.png)
   pastaFotos:   'jogadores/',         // padrão: jogadores/<nome-do-jogador>.png (ex.: jogadores/ademir-da-guia.png)
   narracao:     'narracao/'           // áudios gerados por ferramentas/gerar_narracao.py (entram no vídeo)
@@ -51,10 +52,15 @@ async function baixar(url, obrigatorio){
 }
 
 /* base carregada */
-const DB = {jogadores:[], porClube:new Map(), quiz:[], ranking:{}, mapaEscudos:{}, clubesComEscudo:[], clubeInfo:{}, problemas:[]};
+const DB = {jogadores:[], porClube:new Map(), quiz:[], ranking:{}, mapaEscudos:{}, clubesComEscudo:[], clubeInfo:{}, escalacoes:[], problemas:[]};
 let RANKING_FIXO = {};
 async function carregarDados(){
-  const [jog, quiz, rank, esc, clu] = await Promise.all([baixar(CONFIG.jogadores,true), baixar(CONFIG.quiz), baixar(CONFIG.ranking), baixar(CONFIG.escudos), baixar(CONFIG.clubes)]);
+  const [jog, quiz, rank, esc, clu, escal] = await Promise.all([baixar(CONFIG.jogadores,true), baixar(CONFIG.quiz), baixar(CONFIG.ranking), baixar(CONFIG.escudos), baixar(CONFIG.clubes), baixar(CONFIG.escalacoes)]);
+  escal.forEach((r,i)=>{ const time=clubeOk(col(r,'Time')), ano=col(r,'Ano'), tit=lista(col(r,'Escalação','Escalacao','Titulares')), res=lista(col(r,'Substitutos','Reservas'));
+    if(!time||!ano) return;
+    if(tit.length!==11){ DB.problemas.push(`Escalações, linha ${i+2} (${time} ${ano}): ${tit.length} titulares (o certo são 11).`); return }
+    const esq=(col(r,'Esquema')||'').split('-').map(Number).filter(n=>n>0);
+    DB.escalacoes.push({ano, time, titulares:tit, reservas:res, linhas: esq.reduce((a,b)=>a+b,0)===10 ? [1,...esq] : [1,4,3,3]}) });
   clu.forEach(r=>{ const c=col(r,'Clube'); if(c) DB.clubeInfo[slug(clubeOk(c))]={pais:col(r,'País','Pais'), uf:col(r,'Estado','UF')} });
   const vistos=new Set();
   jog.forEach((r,i)=>{
@@ -71,9 +77,9 @@ async function carregarDados(){
   });
   DB.quiz=quiz.map(r=>({q:col(r,'Pergunta'), certa:col(r,'Resposta certa','Certa'), err:[col(r,'Errada 1'),col(r,'Errada 2'),col(r,'Errada 3')]}))
     .filter(q=>q.q&&q.certa&&q.err.every(Boolean)).map(q=>({q:q.q, certa:q.certa, opcoes:[q.certa,...q.err]}));
-  const jogos=['carreira','dois-clubes','intruso','escudo','silhueta','quiz'];
+  const jogos=['carreira','dois-clubes','intruso','escudo','escalacao','quiz'];
   RANKING_FIXO=Object.fromEntries(jogos.map(g=>[g,[]]));
-  rank.forEach(r=>{ const g=slug(col(r,'Jogo')), pts=parseInt(String(col(r,'Pontos')).replace(/\D/g,''),10);
+  rank.forEach(r=>{ const g=slug(col(r,'Jogo')), bruto=String(col(r,'Pontos')).trim(), pts=parseFloat(bruto.includes(',')?bruto.replace(/\./g,'').replace(',','.'):bruto);
     if(RANKING_FIXO[g]&&col(r,'Nome')&&pts>=0) RANKING_FIXO[g].push({nome:col(r,'Nome'), pontos:pts, video:col(r,'Link do vídeo','Video','Link')}) });
   esc.forEach(r=>{ const c=col(r,'Clube'), a=col(r,'Arquivo'); if(c&&a){ DB.mapaEscudos[slug(clubeOk(c))]=a; DB.clubesComEscudo.push(clubeOk(c)) } });
 }
