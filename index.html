@@ -87,6 +87,32 @@ h1,h2,h3{font-family:"Montserrat",sans-serif; line-height:1.05; margin:0; text-t
 .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; text-align:center}
 .stats b{display:block; font-size:24px; font-weight:900}
 .stats span{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; font-weight:600}
+/* tela de cada jogo: cartão com exemplo visual */
+.previa2 .cab{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px}
+.previa2 .rot{font-size:12px; font-weight:800; letter-spacing:.1em; color:var(--muted); text-transform:uppercase}
+.previa2 .num{font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase}
+.previa2 .num b{color:var(--laranja); font-size:15px}
+.mini{display:flex; flex-direction:column; gap:12px; align-items:center}
+.mini .lin{display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap}
+.mini .lin i{font-style:normal; color:var(--laranja); font-weight:900; font-size:18px}
+.mini .esc{width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.92); display:grid; place-items:center; position:relative; overflow:hidden; flex:none}
+.mini .esc b{font-size:13px; font-weight:900; color:var(--noite)}
+.mini .esc img{position:absolute; inset:15%; width:70%; height:70%; object-fit:contain; display:none}
+.mini .esc.com img{display:block} .mini .esc.com b{display:none}
+.mini .esc.grande{width:64px; height:64px}
+.mini .esc.silh{background:transparent; width:84px; height:84px}
+.mini .esc.silh img{filter:brightness(0) invert(1); inset:0; width:100%; height:100%}
+.mini .esc.silh b{color:#fff}
+.mini .ops{display:grid; grid-template-columns:1fr 1fr; gap:6px; width:100%}
+.mini .ops.tres{grid-template-columns:1fr 1fr 1fr}
+.mini .op{border:1px solid var(--vidro-borda); background:rgba(0,0,60,.35); border-radius:8px; padding:6px 4px; font-size:12px; font-weight:700; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.mini .op.certa{border-color:var(--ciano); background:rgba(25,227,255,.18)}
+.mini .op.errada{border-color:var(--rosa); background:rgba(255,36,118,.18); text-decoration:line-through}
+.mini .lista{display:flex; flex-direction:column; gap:3px; width:min(100%,220px)}
+.mini .lista span{font-size:11px; font-weight:700; text-align:center; padding:2px 6px; border-radius:999px; background:rgba(255,255,255,.1)}
+.mini .lista span.falta{background:var(--laranja)}
+.mini .lista em{font-style:normal; text-align:center; color:var(--muted); line-height:.8}
+.mini .perg{margin:0; font-size:15px; font-weight:800; text-align:center; line-height:1.25}
 /* tela de cada jogo */
 .back.ic{width:44px; height:44px; border:1.5px solid rgba(255,255,255,.35); border-radius:12px; display:grid; place-items:center; color:#fff; font-size:22px; line-height:1}
 .titulo-jogo{font-size:clamp(38px,11vw,52px); font-weight:900; line-height:1; letter-spacing:-.02em}
@@ -428,13 +454,39 @@ function tabelaRanking(lista, voce){
 }
 
 const INTRO={
-  carreira:{desc:'Os escudos aparecem na ordem em que o jogador passou pelos clubes. Descubra quem é.', rot:'A base', qtd:()=>poolCarreira().length+' jogadores'},
+  carreira:{desc:'Os escudos aparecem na ordem em que o jogador passou pelos clubes. Descubra quem é.', rot:'A carreira', qtd:()=>poolCarreira().length+' jogadores'},
   'dois-clubes':{desc:'Dois clubes, um jogador em comum. Descubra quem vestiu as duas camisas.', rot:'Os clubes', qtd:()=>DB.porClube.size+' times paulistas'},
-  intruso:{desc:'Seis jogadores e um clube. Só um deles nunca jogou lá: encontre o intruso.', rot:'Os elencos', qtd:()=>[...DB.porClube.values()].filter(l=>l.length>=5).length+' clubes'},
-  escudo:{desc:'Só a silhueta do escudo. Descubra qual é o clube paulista.', rot:'Os escudos', qtd:()=>(POOL.escudo?POOL.escudo.length:DB.clubesComEscudo.length)+' clubes'},
-  escalacao:{desc:'A escalação de um campeão paulista com um titular faltando. Complete o time.', rot:'As finais', qtd:()=>DB.escalacoes.length+' campeões'},
-  quiz:{desc:'Perguntas sobre a história do futebol paulista. Responda rápido para somar mais pontos.', rot:'As perguntas', qtd:()=>DB.quiz.length+' perguntas'}
+  intruso:{desc:'Seis jogadores e um clube. Só um deles nunca jogou lá: encontre o intruso.', rot:'O elenco', qtd:()=>[...DB.porClube.values()].filter(l=>l.length>=5).length+' clubes'},
+  escudo:{desc:'Só a silhueta do escudo. Descubra qual é o clube paulista.', rot:'O escudo', qtd:()=>(POOL.escudo?POOL.escudo.length:[...new Set(DB.clubesComEscudo)].filter(c=>/-\s*SP/i.test(DB.mapaEscudos[slug(c)]||'')).length)+' clubes paulistas'},
+  escalacao:{desc:'A escalação de um campeão paulista com um titular faltando. Complete o time.', rot:'A escalação', qtd:()=>DB.escalacoes.length+' campeões'},
+  quiz:{desc:'Perguntas sobre a história do futebol paulista. Responda rápido para somar mais pontos.', rot:'O quiz', qtd:()=>DB.quiz.length+' perguntas'}
 };
+/* "explicação visual": uma rodada de exemplo de cada jogo, já respondida (certa em verde, uma errada em rosa) */
+const escMini = (c,cls='') => `<span class="esc ${cls}" data-clube="${esc(c)}"><b>${esc(iniciais(c))}</b><img alt=""></span>`;
+function opcoesMini(r){ const errada=r.opcoes.find(o=>o!==r.certa);
+  return `<div class="ops">${r.opcoes.slice(0,4).map(o=>`<span class="op ${o===r.certa?'certa':o===errada?'errada':''}">${esc(o)}</span>`).join('')}</div>` }
+function exemploHTML(id){
+  try{
+    if(id==='escudo'){
+      const P=POOL.escudo||[...new Set(DB.clubesComEscudo)].filter(c=>/-\s*SP/i.test(DB.mapaEscudos[slug(c)]||'')); if(P.length<4) return '';
+      const c=P[Math.random()*P.length|0], ops=shuffle([c,...outros(P,c)]);
+      return `<div class="lin">${escMini(c,'grande silh')}</div>${opcoesMini({opcoes:ops,certa:c})}`;
+    }
+    const r=montarRodadas(id)[0]; if(!r) return '';
+    if(id==='carreira') return `<div class="lin">${r.badges.slice(0,5).map((c,k)=>(k?'<i>›</i>':'')+escMini(c)).join('')}</div>${opcoesMini(r)}`;
+    if(id==='dois-clubes') return `<div class="lin">${escMini(r.badges[0],'grande')}<i>+</i>${escMini(r.badges[1],'grande')}</div>${opcoesMini(r)}`;
+    if(id==='intruso') return `<div class="lin">${escMini(r.clube,'grande')}</div><div class="ops tres">${r.opcoes.map(o=>`<span class="op ${o===r.certa?'certa':''}">${esc(o)}</span>`).join('')}</div>`;
+    if(id==='escalacao'){ const t=r.lista.titulares, f=r.lista.falta, ini=Math.max(0,Math.min(t.length-5,f-2));
+      return `<div class="lista">${ini>0?'<em>…</em>':''}${t.slice(ini,ini+5).map((n,q)=>{ const k=ini+q; return `<span class="${k===f?'falta':''}">${k===f?'?':esc(n)}</span>` }).join('')}${ini+5<t.length?'<em>…</em>':''}</div>${opcoesMini(r)}` }
+    if(id==='quiz') return `<p class="perg">${esc(r.prompt)}</p>${opcoesMini(r)}`;
+  }catch(e){}
+  return '';
+}
+function hidratarEscudos(raiz){
+  raiz.querySelectorAll('.esc[data-clube]').forEach(el=>{
+    carregarImagem('clube:'+slug(el.dataset.clube)).then(r=>{ if(r){ el.querySelector('img').src=r.url; el.classList.add('com') } });
+  });
+}
 function renderIntro(){
   const g=S.game, info=INTRO[g.id]||{desc:'',rot:'',qtd:()=>''}, rk=rankingDe(g.id);
   const [n,...rest]=String(info.qtd()).split(' ');
@@ -442,13 +494,15 @@ function renderIntro(){
     <button class="back ic" id="voltar" aria-label="Voltar aos desafios">‹</button>
     <h2 class="titulo-jogo entra">${g.nome}</h2>
     <p class="desc entra" style="--d:.05s">${info.desc}</p>
-    <div class="box previa entra" style="--d:.1s">${ICONS[g.id]}<div style="flex:1"><div class="rot">${info.rot}</div><div class="meta">10 rodadas · ${g.tempo} s por rodada</div></div><div class="num"><b>${n}</b> ${rest.join(' ')}</div></div>
+    <p class="note entra" style="--d:.08s; margin:-4px 0 0">10 rodadas · ${g.tempo} s por rodada · até 100 pontos</p>
+    <div class="box previa2 entra" style="--d:.1s"><div class="cab"><span class="rot">${info.rot}</span><span class="num"><b>${n}</b> ${rest.join(' ')}</span></div><div class="mini">${exemploHTML(g.id)}</div></div>
     <div class="acoes entra" style="--d:.15s"><button class="btn" id="comecar">Jogar com câmera</button><button class="btn sec" id="semcam">Jogar sem câmera</button></div>
     <div class="filtros entra" style="--d:.2s">
       <label class="tg">Som<input type="checkbox" id="som" ${S.som?'checked':''}></label>
       <label class="tg">Narração<input type="checkbox" id="nar" ${S.narracao?'checked':''}></label></div>
     <div class="box entra" style="--d:.25s"><h3>Ranking${rk[0]?.ficticio?'<span class="selo">ilustrativo</span>':''}</h3>${tabelaRanking(rk)}</div>
   </div>`;
+  hidratarEscudos(app);
   document.getElementById('voltar').onclick=()=>go('home');
   document.getElementById('som').onchange=e=>S.som=e.target.checked;
   document.getElementById('nar').onchange=e=>S.narracao=e.target.checked;
