@@ -102,7 +102,9 @@ function nomesBase(key){
 function candidatos(key){
   const pasta=key.startsWith('clube:')?CONFIG.pastaEscudos:CONFIG.pastaFotos, out=[];
   nomesBase(key).forEach(b=>{ if(/\.(png|jpe?g|webp|svg)$/i.test(b)) out.push(b); else EXTS.forEach(e=>out.push(b+e)) });
-  return [...new Set(out)].map(f=>pasta+encodeURIComponent(f.normalize('NFC')));
+  /* arquivos com acento podem ter sido salvos em outra codificação (NFC ou NFD): tenta as duas */
+  const nomes=[]; out.forEach(f=>{ nomes.push(f.normalize('NFC')); if(f.normalize('NFD')!==f.normalize('NFC')) nomes.push(f.normalize('NFD')) });
+  return [...new Set(nomes)].map(f=>pasta+encodeURIComponent(f));
 }
 const IMGS=new Map();
 function carregarImagem(key){
