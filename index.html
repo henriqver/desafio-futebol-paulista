@@ -254,7 +254,7 @@ function montarRodadas(id){
     if(err.length<3) err=err.concat(shuffle((DB.porClube.get(e.time)||[]).map(j=>j.nome).filter(n=>fora(n)&&!err.includes(n))).slice(0,3-err.length));
     if(err.length<3) err=err.concat(shuffle(DB.jogadores.map(j=>j.nome).filter(n=>fora(n)&&!err.includes(n))).slice(0,3-err.length));
     const art=artigo(e.time);
-    return {prompt:`Quem falta ${art} ${e.time} campeão de ${e.ano}?`, campo:{time:e.time, titulares:e.titulares, slots:e.slots, falta:k}, opcoes:shuffle([certa,...err]), avatares:true, certa, respKey:'jogador:'+slug(certa),
+    return {prompt:`Quem falta ${art} ${e.time} campeão de ${e.ano}?`, clube:e.time, lista:{titulares:e.titulares, falta:k}, opcoes:shuffle([certa,...err]), avatares:true, certa, respKey:'jogador:'+slug(certa),
       fala:`Quem falta ${art} ${pronuncia(e.time)} campeão de ${e.ano}?`, falaSeg:[`Quem falta ${art}`, e.time, `campeão de ${e.ano}`],
       falaCurta:`${pronuncia(e.time)}, campeão de ${e.ano}`, falaSegCurta:[e.time, `campeão de ${e.ano}`]};
   });
@@ -443,7 +443,7 @@ async function iniciar(comCamera){
   if(AU.ctx&&AU.dest&&S.stream&&S.stream.getAudioTracks().length){ AU.mic=AU.ctx.createMediaStreamSource(S.stream); AU.mic.connect(AU.dest) }
   try{ await Promise.all(['500','600','700','800','900'].map(w=>document.fonts.load(`${w} 40px "Montserrat"`))) }catch(e){}
   if(NARR.indice&&AU.ctx) S.rodadas.forEach(r=>[...(r.falaSeg||[]), r.certa].forEach(x=>{ if(NARR.indice.has(slug(x))) bufferDe(x) }));
-  S.rodadas.forEach(r=>{ if(r.campo) imgDe('clube:'+slug(r.campo.time)); if(r.imgKey) imgDe(r.imgKey); (r.badges||[]).forEach(b=>imgDe('clube:'+slug(b))); if(r.clube) imgDe('clube:'+slug(r.clube)); r.opcoes.forEach(o=>{imgDe('jogador:'+slug(o)); imgDe('clube:'+slug(o))}) });
+  S.rodadas.forEach(r=>{ if(r.clube) imgDe('clube:'+slug(r.clube)); if(r.imgKey) imgDe(r.imgKey); (r.badges||[]).forEach(b=>imgDe('clube:'+slug(b))); if(r.clube) imgDe('clube:'+slug(r.clube)); r.opcoes.forEach(o=>{imgDe('jogador:'+slug(o)); imgDe('clube:'+slug(o))}) });
   S.pausado=true; S.contagemAt=performance.now(); go('play');
   comecarGravacao();
   for(let n=0;n<3;n++){ SFX.beep(); await espera(RM?400:850); if(S.abortado) return }
@@ -543,7 +543,7 @@ function setF(size,w=700,fam='Montserrat'){ g.font=`${w} ${size}px "${fam}", "Ar
 function largMax(ls,size,w=700,fam='Montserrat'){ setF(size,w,fam); return Math.max(0,...ls.map(l=>g.measureText(l).width)) }
 function quebrar(t,max,size,w=700,fam='Montserrat'){ setF(size,w,fam); const ls=[]; let l=''; for(const p of String(t).split(' ')){ const s=l?l+' '+p:p; if(g.measureText(s).width>max&&l){ls.push(l); l=p} else l=s } if(l) ls.push(l); return ls }
 /* com câmera, o conteúdo fica no terço final; o campinho da escalação precisa de mais espaço */
-function zona(r){ const top=S.camOk?Math.round(H*(r&&r.campo?.4:.6)):150; return {top, bot:H-36} }
+function zona(r){ const top=S.camOk?Math.round(H*(r&&(r.campo||r.lista)?.45:.6)):150; return {top, bot:H-36} }
 
 function calcularLayout(r){
   if(!r) return null;
@@ -562,6 +562,19 @@ function montarLayout(r,k){
   const ps=Math.round(42*k); const lines=quebrar(r.prompt,IW,ps); if(lines.length>4||largMax(lines,ps,700)>IW) L.okLinhas=false;
   L.prompt={lines, y:y+ps*.85, size:ps, lh:ps*1.08}; y+=lines.length*ps*1.08+6;
   y+=6*k;
+  if(r.lista){
+    /* escalação em lista corrida, na ordem do CSV; o jogador que falta aparece como "?" */
+    const fs=Math.round(24*k), hh=fs*1.75, gap=8*k, padX=fs*.7, nomes=r.lista.titulares.map((n,i)=>i===r.lista.falta?'?':n);
+    setF(fs,700); const larg=nomes.map(n=>g.measureText(n).width+padX*2);
+    if(Math.max(...larg)>IW) L.okLinhas=false;
+    const fileiras=[[]]; let w=0;
+    nomes.forEach((n,i)=>{ const lw=n==='?'?Math.max(larg[i],fs*3):larg[i]; if(fileiras.at(-1).length&&w+gap+lw>IW){ fileiras.push([]); w=0 } w+=(fileiras.at(-1).length?gap:0)+lw; fileiras.at(-1).push({i,lw}) });
+    const itens=[];
+    fileiras.forEach((f,ri)=>{ const tot=f.reduce((a,b)=>a+b.lw,0)+gap*(f.length-1); let cx=X+pad+(IW-tot)/2;
+      f.forEach(c=>{ itens.push({i:c.i, x:cx, y:y+ri*(hh+gap), w:c.lw, h:hh}); cx+=c.lw+gap }) });
+    L.lista={itens, fs};
+    y+=fileiras.length*(hh+gap)-gap+12*k;
+  }
   if(r.campo){
     /* coordenadas do campinho (x da esquerda para a direita, y do próprio gol ao ataque, de 0 a 100) */
     const sl=r.campo.slots, fw=IW, fh=Math.min(fw*1.18, 680*k);
@@ -754,6 +767,22 @@ function rodada(now){
   }
   // pergunta
   const P=L.prompt; P.lines.forEach((l,i)=>{ const a=clamp01((te-120-i*60)/300); g.globalAlpha=RM?1:a; txt(l,W/2,P.y+i*P.lh+(RM?0:(1-ease(a))*14),P.size,{w:700,align:'center'}) }); g.globalAlpha=1;
+  // escalação em lista
+  if(L.lista){
+    /* o "?" é desenhado por último: na revelação ele cresce até caber o nome inteiro, por cima dos vizinhos */
+    [...L.lista.itens].sort((a,b)=>(a.i===r.lista.falta)-(b.i===r.lista.falta)).forEach(c=>{
+      const p=RM?1:easeBack((te-220-c.i*45)/320); if(p<=0) return;
+      const falta=c.i===r.lista.falta, nome=r.lista.titulares[c.i];
+      let cw=c.w; if(falta&&revela){ setF(L.lista.fs,800); cw=Math.max(c.w, g.measureText(nome).width+L.lista.fs*1.4) }
+      g.save(); g.translate(c.x+c.w/2,c.y+c.h/2); g.scale(p,p);
+      rr(-cw/2,-c.h/2,cw,c.h,c.h/2);
+      if(falta){ g.fillStyle = revela ? (fb.k==='ok'?C.acerto:C.erro) : C.placar; g.fill(); g.lineWidth=2; g.strokeStyle='#fff'; g.stroke() }
+      else { g.fillStyle='rgba(255,255,255,.12)'; g.fill(); g.lineWidth=1.5; g.strokeStyle='rgba(255,255,255,.35)'; g.stroke() }
+      const t = falta ? (revela ? nome : '?') : nome, fs=L.lista.fs;
+      txt(t,0,1,fs,{w:falta?800:700,align:'center',base:'middle',cor: falta&&revela&&fb.k==='ok' ? C.escuro : '#fff'});
+      g.restore();
+    });
+  }
   // campinho com a escalação
   if(L.campo){
     const F=L.campo, a=RM?1:clamp01((te-150)/400);
