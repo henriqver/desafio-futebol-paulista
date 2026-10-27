@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Diagnóstico de escudos</title>
+<style>
+body{font:15px/1.5 system-ui,sans-serif; margin:0; padding:20px; background:#f3f3fb; color:#000052}
+h1{font-size:22px; margin:0 0 6px} h2{font-size:17px; margin:22px 0 6px}
+.box{background:#fff; border:1px solid #dadaf0; border-radius:10px; padding:10px 14px; margin:8px 0; overflow-x:auto}
+.ok{color:#067647; font-weight:700} .erro{color:#d1105a; font-weight:700}
+code{font-size:13px; word-break:break-all} img,canvas{max-height:60px; vertical-align:middle; margin-left:8px; background:#eee}
+</style>
+</head>
+<body>
+<h1>Diagnóstico de escudos</h1>
+<p>Esta página testa, passo a passo, o carregamento de alguns escudos. Envie uma captura dela inteira.</p>
+<div id="saida"></div>
+<script>
+const saida=document.getElementById('saida');
+const linha=(ok,txt)=>{ const d=document.createElement('div'); d.innerHTML=`<span class="${ok?'ok':'erro'}">${ok?'✓':'✗'}</span> ${txt}`; return d };
+const bloco=t=>{ const h=document.createElement('h2'); h.textContent=t; saida.appendChild(h); const b=document.createElement('div'); b.className='box'; saida.appendChild(b); return b };
+(async()=>{
+  const b0=bloco('1. Arquivos do site');
+  b0.appendChild(linha(true,'Navegador: <code>'+navigator.userAgent+'</code>'));
+  // carrega o dados.js sem cache
+  await new Promise(res=>{ const s=document.createElement('script'); s.src='js/dados.js?diag='+Date.now(); s.onload=res; s.onerror=()=>{ b0.appendChild(linha(false,'js/dados.js não foi encontrado')); res() }; document.head.appendChild(s) });
+  if(typeof carregarDados!=='function'){ b0.appendChild(linha(false,'js/dados.js não carregou.')); return }
+  const fonte=String(typeof carregarSVG==='function'?carregarSVG:'');
+  b0.appendChild(linha(fonte.includes('AbortController'), 'js/dados.js publicado é a versão mais recente (com conversão de SVG)'));
+  try{ const t=await (await fetch('index.html?diag='+Date.now(),{cache:'no-store'})).text(); const v=(t.match(/dados\.js\?v=([\w-]+)/)||[])[1];
+    b0.appendChild(linha(v==='2026-10-29','index.html publicado pede dados.js versão <code>'+v+'</code> (esperado: 2026-10-29)')) }catch(e){}
+  await carregarDados();
+  b0.appendChild(linha(Object.keys(DB.mapaEscudos).length>200, 'escudos.csv lido: '+Object.keys(DB.mapaEscudos).length+' clubes registrados'));
+
+  for(const clube of ['Real Madrid','Milan','Porto','Manchester United','Corinthians']){
+    const b=bloco('2. '+clube);
+    const reg=DB.mapaEscudos[slug(clube)];
+    b.appendChild(linha(!!reg, 'Registro no escudos.csv: <code>'+(reg||'(nenhum)')+'</code>'));
+    const url=candidatos('clube:'+slug(clube))[0];
+    b.appendChild(linha(true,'Primeiro arquivo tentado: <code>'+decodeURIComponent(url)+'</code>'));
+    try{
+      const r=await fetch(url+'?diag='+Date.now(),{cache:'no-store'});
+      const tipo=r.headers.get('content-type'), txt=r.ok?await r.text():'';
+      b.appendChild(linha(r.ok, `Download: HTTP ${r.status}, tipo <code>${tipo}</code>, ${txt.length} caracteres`));
+      if(r.ok && /\.svg/i.test(url)){
+        const tag=(txt.match(/<svg\b[^>]*>/i)||[''])[0];
+        b.appendChild(linha(!!tag,'Cabeçalho do SVG: <code>'+tag.replace(/</g,'&lt;').slice(0,300)+'</code>'));
+      }
+    }catch(e){ b.appendChild(linha(false,'Download falhou: '+e.message)) }
+    IMGS.delete('clube:'+slug(clube));
+    const t0=performance.now(), res=await carregarImagem('clube:'+slug(clube)), ms=Math.round(performance.now()-t0);
+    const d=linha(!!res, res ? `Carregado pelo jogo em ${ms} ms (${res.im.width||res.im.naturalWidth}×${res.im.height||res.im.naturalHeight}) a partir de <code>${decodeURIComponent(res.url)}</code>` : `O jogo NÃO conseguiu carregar (${ms} ms)`);
+    if(res){ const c=document.createElement('canvas'); c.width=res.im.width||res.im.naturalWidth; c.height=res.im.height||res.im.naturalHeight; c.getContext('2d').drawImage(res.im,0,0); d.appendChild(c) }
+    b.appendChild(d);
+  }
+})().catch(e=>saida.appendChild(linha(false,'Erro: '+e.message)));
+</script>
+</body>
+</html>
