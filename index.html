@@ -87,6 +87,25 @@ h1,h2,h3{font-family:"Montserrat",sans-serif; line-height:1.05; margin:0; text-t
 .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; text-align:center}
 .stats b{display:block; font-size:24px; font-weight:900}
 .stats span{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; font-weight:600}
+/* tela de cada jogo */
+.back.ic{width:44px; height:44px; border:1.5px solid rgba(255,255,255,.35); border-radius:12px; display:grid; place-items:center; color:#fff; font-size:22px; line-height:1}
+.titulo-jogo{font-size:clamp(38px,11vw,52px); font-weight:900; line-height:1; letter-spacing:-.02em}
+.desc{font-size:19px; line-height:1.45; color:rgba(255,255,255,.88); margin:0}
+.previa{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.previa .rot{font-size:12px; font-weight:800; letter-spacing:.1em; color:var(--muted); text-transform:uppercase}
+.previa .num{font-size:12px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap}
+.previa .num b{color:var(--laranja); font-size:15px}
+.previa svg{width:54px; height:54px; color:var(--laranja); flex:none}
+.previa .meta{font-size:14px; color:rgba(255,255,255,.85); margin-top:4px}
+.acoes{display:flex; flex-direction:column; gap:10px}
+.acoes .btn{width:100%; font-size:17px; padding:17px}
+.filtros{display:flex; gap:10px}
+.filtros .tg{flex:1; background:var(--vidro); border:1px solid var(--vidro-borda); border-radius:14px; padding:12px 14px; font-weight:600}
+.rank .av{width:34px; height:34px; border-radius:50%; display:block; flex:none}
+.rank .pessoa{display:flex; align-items:center; gap:10px}
+.rank .perfil{display:block; font-size:12px; color:var(--muted); font-weight:500}
+.rank tr.voce .perfil{color:rgba(255,255,255,.85)}
+.selo{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); border:1px solid var(--vidro-borda); border-radius:999px; padding:2px 8px; margin-left:8px; vertical-align:middle}
 video.preview{width:100%; border-radius:18px; background:#000; aspect-ratio:9/16; max-height:68vh; object-fit:contain; display:block}
 
 /* PALCO (tela de jogo) */
@@ -374,25 +393,61 @@ function renderHome(){
   </div>`;
   app.querySelectorAll('.card').forEach(b=>b.onclick=()=>{S.game=GAMES.find(g=>g.id===b.dataset.g); go('intro')});
 }
+/* RANKING FICTÍCIO (ilustrativo): usado enquanto o ranking.csv não tiver participantes daquele jogo */
+const NOMES_FICT=[['Bruno Tavares','Ex-atleta'],['Camila Rocha','Torcedora'],['Diego Martins','Influenciador'],['Larissa Nunes','Jornalista'],['Felipe Arantes','Torcedor'],
+  ['Juliana Prado','Atleta'],['Thiago Bastos','Influenciador'],['Mariana Lopes','Torcedora'],['Gustavo Reis','Ex-atleta'],['Patrícia Vidal','Apresentadora']];
+function hashTxt(t){ let h=2166136261; for(const c of t){ h^=c.charCodeAt(0); h=Math.imul(h,16777619)>>>0 } return h }
+function rankingFicticio(id){
+  let x=hashTxt(id)||1; const rnd=()=>{ x^=x<<13; x>>>=0; x^=x>>17; x^=x<<5; x>>>=0; return x/4294967296 };
+  let p=86+rnd()*10; const ordem=[...NOMES_FICT].sort(()=>rnd()-.5);
+  return ordem.map(([nome,perfil])=>{ const r={nome, perfil, pontos:Math.round(p*10)/10, ficticio:true}; p-=2+rnd()*6; return r });
+}
+const rankingDe = id => (RANKING_FIXO[id]&&RANKING_FIXO[id].length) ? RANKING_FIXO[id] : rankingFicticio(id);
+/* "foto" fictícia: ilustração gerada a partir do nome */
+const AVATARES={};
+function avatarURL(nome){
+  if(AVATARES[nome]) return AVATARES[nome];
+  const h=hashTxt(nome), pele=['#F2C6A0','#E0A877','#C68650','#9C6339','#6E4426'][h%5], cab=['#1F1A17','#3B2618','#6B4423','#A0522D','#D9B26F'][(h>>3)%5];
+  const fundo=['#0000FF','#000082','#FF5A0A','#FF2476','#2A2AD6'][(h>>6)%5], cam=['#FFFFFF','#FFC233','#19E3FF','#000052'][(h>>9)%4], tipo=(h>>12)%4;
+  const cabelo=[`<path d="M30 40c0-14 9-22 20-22s20 8 20 22c-4-7-10-10-20-10s-16 3-20 10z" fill="${cab}"/>`,
+    `<path d="M28 44c-2-18 8-27 22-27s24 9 22 27c-2-9-6-13-9-14 2 5 0 9-13 9s-15-4-13-9c-3 1-7 5-9 14z" fill="${cab}"/>`,
+    `<path d="M27 66c-6-26 2-48 23-48s29 22 23 48c-3-10-4-22-6-27-4 4-10 6-17 6s-13-2-17-6c-2 5-3 17-6 27z" fill="${cab}"/>`,
+    `<path d="M31 37c2-12 10-17 19-17s17 5 19 17c-6-4-12-5-19-5s-13 1-19 5z" fill="${cab}"/>`][tipo];
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="${fundo}"/><g transform="translate(50 52) scale(1.38) translate(-50 -48)"><path d="M14 104c2-20 17-30 36-30s34 10 36 30z" fill="${cam}"/><rect x="43" y="58" width="14" height="16" fill="${pele}"/><ellipse cx="50" cy="44" rx="17" ry="20" fill="${pele}"/>${cabelo}</g></svg>`;
+  return AVATARES[nome]='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+const AVATAR_IMG={};
+function avatarImg(nome){ if(!AVATAR_IMG[nome]){ const i=new Image(); i.src=avatarURL(nome); AVATAR_IMG[nome]=i } const i=AVATAR_IMG[nome]; return i.complete&&i.naturalWidth?i:null }
 function tabelaRanking(lista, voce){
   const linhas = lista.slice(); if(voce!=null) linhas.push({nome:'Você', perfil:'Esta partida', pontos:voce, voce:true});
   linhas.sort((a,b)=>b.pontos-a.pontos);
   if(!linhas.length) return '<p class="note">O ranking deste desafio ainda não foi publicado.</p>';
-  return `<table class="rank">${linhas.map((r,k)=>`<tr class="${r.voce?'voce':''} entra" style="--d:${.1+k*.07}s"><td>${k+1}</td>
-    <td>${esc(r.nome)}${r.video?` <a href="${esc(r.video)}" target="_blank" rel="noopener">vídeo</a>`:''}</td>
+  return `<table class="rank">${linhas.map((r,k)=>`<tr class="${r.voce?'voce':''} entra" style="--d:${.1+k*.05}s"><td>${k+1}</td>
+    <td><div class="pessoa">${r.voce?'':`<img class="av" src="${avatarURL(r.nome)}" alt="">`}<div>${esc(r.nome)}${r.video?` <a href="${esc(r.video)}" target="_blank" rel="noopener">vídeo</a>`:''}<span class="perfil">${esc(r.perfil||'')}</span></div></div></td>
     <td>${fmtPts(r.pontos)}</td></tr>`).join('')}</table>`;
 }
 
+const INTRO={
+  carreira:{desc:'Os escudos aparecem na ordem em que o jogador passou pelos clubes. Descubra quem é.', rot:'A base', qtd:()=>poolCarreira().length+' jogadores'},
+  'dois-clubes':{desc:'Dois clubes, um jogador em comum. Descubra quem vestiu as duas camisas.', rot:'Os clubes', qtd:()=>DB.porClube.size+' times paulistas'},
+  intruso:{desc:'Seis jogadores e um clube. Só um deles nunca jogou lá: encontre o intruso.', rot:'Os elencos', qtd:()=>[...DB.porClube.values()].filter(l=>l.length>=5).length+' clubes'},
+  escudo:{desc:'Só a silhueta do escudo. Descubra qual é o clube paulista.', rot:'Os escudos', qtd:()=>(POOL.escudo?POOL.escudo.length:DB.clubesComEscudo.length)+' clubes'},
+  escalacao:{desc:'A escalação de um campeão paulista com um titular faltando. Complete o time.', rot:'As finais', qtd:()=>DB.escalacoes.length+' campeões'},
+  quiz:{desc:'Perguntas sobre a história do futebol paulista. Responda rápido para somar mais pontos.', rot:'As perguntas', qtd:()=>DB.quiz.length+' perguntas'}
+};
 function renderIntro(){
-  const g=S.game;
+  const g=S.game, info=INTRO[g.id]||{desc:'',rot:'',qtd:()=>''}, rk=rankingDe(g.id);
+  const [n,...rest]=String(info.qtd()).split(' ');
   app.innerHTML = `<div class="page">
-    <button class="back" id="voltar">‹ Desafios</button>
-    <h2 class="entra">${g.nome}</h2>
-    <div class="box entra" style="--d:.05s"><div class="toggles">
+    <button class="back ic" id="voltar" aria-label="Voltar aos desafios">‹</button>
+    <h2 class="titulo-jogo entra">${g.nome}</h2>
+    <p class="desc entra" style="--d:.05s">${info.desc}</p>
+    <div class="box previa entra" style="--d:.1s">${ICONS[g.id]}<div style="flex:1"><div class="rot">${info.rot}</div><div class="meta">10 rodadas · ${g.tempo} s por rodada</div></div><div class="num"><b>${n}</b> ${rest.join(' ')}</div></div>
+    <div class="acoes entra" style="--d:.15s"><button class="btn" id="comecar">Jogar com câmera</button><button class="btn sec" id="semcam">Jogar sem câmera</button></div>
+    <div class="filtros entra" style="--d:.2s">
       <label class="tg">Som<input type="checkbox" id="som" ${S.som?'checked':''}></label>
-      <label class="tg">Narração<input type="checkbox" id="nar" ${S.narracao?'checked':''}></label></div></div>
-    <div class="row entra" style="--d:.1s"><button class="btn" id="comecar">Jogar com câmera</button><button class="btn sec" id="semcam">Jogar sem câmera</button></div>
-    <div class="box entra" style="--d:.15s"><h3>Ranking</h3>${tabelaRanking(RANKING_FIXO[g.id]||[])}</div>
+      <label class="tg">Narração<input type="checkbox" id="nar" ${S.narracao?'checked':''}></label></div>
+    <div class="box entra" style="--d:.25s"><h3>Ranking${rk[0]?.ficticio?'<span class="selo">ilustrativo</span>':''}</h3>${tabelaRanking(rk)}</div>
   </div>`;
   document.getElementById('voltar').onclick=()=>go('home');
   document.getElementById('som').onchange=e=>S.som=e.target.checked;
@@ -497,11 +552,11 @@ function proxima(){
   S.leaveAt=performance.now();
   setTimeout(()=>{ if(S.tela!=='play') return; S.i++; if(S.i<S.rodadas.length) novaRodada(); else finalizar() }, RM?50:300);
 }
-function posicaoNoRanking(){ const l=RANKING_FIXO[S.game.id]||[]; return l.filter(x=>x.pontos>S.pontos).length+1 }
+function posicaoNoRanking(){ const l=rankingDe(S.game.id); return l.filter(x=>x.pontos>S.pontos).length+1 }
 
 async function finalizar(){
   S.final=true; S.finalAt=performance.now(); S.layout=null; clearInterval(tick); musicaDesliga(); posicionarOverlays();
-  SFX.fanfarra(); const ac=S.log.filter(l=>l.ok).length;
+  SFX.fanfarra(); const ac=S.log.filter(l=>l.ok).length; linhasRankingFinal().forEach(l=>avatarImg(l.nome));
   falar(`Fim de jogo! Você fez ${fmtPts(S.pontos)} pontos e acertou ${ac} de ${S.rodadas.length}.`, ['Fim de jogo!']);
   const linhas=linhasRankingFinal().length;
   for(let k=0;k<linhas;k++){ setTimeout(()=>{ if(S.tela==='play') SFX.pop() }, 2200+k*260) }
@@ -866,7 +921,7 @@ function contagem(now){
 }
 
 function linhasRankingFinal(){
-  const l=(RANKING_FIXO[S.game.id]||[]).map(x=>({...x})); l.push({nome:'Você',perfil:'',pontos:S.pontos,voce:true}); l.sort((a,b)=>b.pontos-a.pontos);
+  const l=rankingDe(S.game.id).map(x=>({...x})); l.push({nome:'Você',perfil:'',pontos:S.pontos,voce:true}); l.sort((a,b)=>b.pontos-a.pontos);
   const pos=l.findIndex(x=>x.voce); const out=l.map((x,i)=>({...x,pos:i+1}));
   if(out.length<=6) return out;
   return pos<6 ? out.slice(0,6) : [...out.slice(0,5), out[pos]];
@@ -888,7 +943,9 @@ function finalQuadro(now){
     if(l.voce&&!RM){ g.lineWidth=3+Math.sin(now/160)*2; g.strokeStyle='rgba(255,194,51,.6)'; g.stroke() }
     const cor=C.giz, my=y+(rowH-8)/2+2;
     txt(l.pos+'º',x+22,my,34,{w:800,cor,base:'middle'});
-    const nf=caber(l.nome,w-260,30,700); txt(l.nome,x+90,my,nf,{w:700,cor,base:'middle'});
+    let nx=x+90; const av=l.voce?null:avatarImg(l.nome), ad=Math.min(48,rowH-20);
+    if(av){ g.save(); g.beginPath(); g.arc(nx+ad/2,my,ad/2,0,Math.PI*2); g.clip(); g.drawImage(av,nx,my-ad/2,ad,ad); g.restore(); nx+=ad+14 }
+    const nf=caber(l.nome,x+w-150-nx,30,700); txt(l.nome,nx,my,nf,{w:700,cor,base:'middle'});
     txt(fmtPts(l.pontos),x+w-22,my,32,{w:800,cor,align:'right',base:'middle'});
     g.restore();
   });
@@ -930,7 +987,7 @@ async function compartilhar(msg){
 function renderResult(){
   const g0=S.game, ac=S.log.filter(l=>l.ok).length, pri=S.log.filter(l=>l.ok&&l.t===1).length;
   const tempos=S.log.filter(l=>l.ok).map(l=>l.seg); const med=tempos.length?(tempos.reduce((a,b)=>a+b,0)/tempos.length).toFixed(1).replace('.',','):'–';
-  const temRank=(RANKING_FIXO[g0.id]||[]).length;
+  const temRank=rankingDe(g0.id).length;
   app.innerHTML=`<div class="page">
     <h2 class="entra">${g0.nome}</h2>
     <div class="entra" style="--d:.05s"><div class="big" id="big">0</div><p class="lead">pontos${temRank?` · ${posicaoNoRanking()}º no ranking`:''}</p></div>
@@ -940,7 +997,7 @@ function renderResult(){
       <div class="row"><button class="btn sec" id="salvar">Salvar vídeo</button></div>
       <p class="note" id="msg" role="status"></p>`
       :`<p class="note">Este navegador não permitiu gravar o vídeo.</p>`}
-    <div class="box"><h3>Ranking</h3>${tabelaRanking(RANKING_FIXO[g0.id]||[], S.pontos)}</div>
+    <div class="box"><h3>Ranking${rankingDe(g0.id)[0]?.ficticio?'<span class="selo">ilustrativo</span>':''}</h3>${tabelaRanking(rankingDe(g0.id), S.pontos)}</div>
     <div class="row"><button class="btn sec" id="denovo">Jogar de novo</button><button class="btn sec" id="inicio">Outros desafios</button></div>
   </div>`;
   const big=document.getElementById('big'), t0=performance.now(), alvo=S.pontos;
