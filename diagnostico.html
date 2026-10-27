@@ -30,7 +30,7 @@ const bloco=t=>{ const h=document.createElement('h2'); h.textContent=t; saida.ap
   const fonte=String(typeof carregarSVG==='function'?carregarSVG:'');
   b0.appendChild(linha(fonte.includes('AbortController'), 'js/dados.js publicado é a versão mais recente (com conversão de SVG)'));
   try{ const t=await (await fetch('index.html?diag='+Date.now(),{cache:'no-store'})).text(); const v=(t.match(/dados\.js\?v=([\w-]+)/)||[])[1];
-    b0.appendChild(linha(v==='2026-10-29','index.html publicado pede dados.js versão <code>'+v+'</code> (esperado: 2026-10-29)')) }catch(e){}
+    b0.appendChild(linha(v==='2026-10-30','index.html publicado pede dados.js versão <code>'+v+'</code> (esperado: 2026-10-30)')) }catch(e){}
   await carregarDados();
   b0.appendChild(linha(Object.keys(DB.mapaEscudos).length>200, 'escudos.csv lido: '+Object.keys(DB.mapaEscudos).length+' clubes registrados'));
 
