@@ -107,7 +107,7 @@ video.preview{width:100%; border-radius:18px; background:#000; aspect-ratio:9/16
 <body>
 <div class="app" id="app"></div>
 <div class="sr" aria-live="polite" id="sr"></div>
-<script src="js/dados.js?v=2026-10-28"></script>
+<script src="js/dados.js?v=2026-10-29"></script>
 <script>
 
 /* =========================================================
@@ -161,13 +161,13 @@ const BANCO = {imgs:new Map(), silh:new Map()};
 function imgDe(key){
   if(BANCO.imgs.has(key)) return BANCO.imgs.get(key);
   BANCO.imgs.set(key,null);
-  carregarImagem(key).then(r=>{ if(r){ BANCO.imgs.set(key,r.im); S.relayout=true } });
+  carregarImagem(key).then(r=>{ if(r){ BANCO.imgs.set(key,r.im); S.relayout=true } else setTimeout(()=>{ if(BANCO.imgs.get(key)===null) BANCO.imgs.delete(key) },20000) });
   return null;
 }
 function silhuetaDe(key){
   const im=imgDe(key); if(!im) return null;
   if(BANCO.silh.has(key)) return BANCO.silh.get(key);
-  const c=document.createElement('canvas'); c.width=im.naturalWidth; c.height=im.naturalHeight;
+  const c=document.createElement('canvas'); c.width=im.naturalWidth||im.width; c.height=im.naturalHeight||im.height;
   const x=c.getContext('2d'); x.drawImage(im,0,0); x.globalCompositeOperation='source-in'; x.fillStyle='#F4F7F2'; x.fillRect(0,0,c.width,c.height);
   BANCO.silh.set(key,c); return c;
 }
