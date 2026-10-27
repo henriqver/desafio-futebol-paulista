@@ -113,6 +113,8 @@ function carregarImagem(key){
         i.onload=()=>{clearTimeout(t); res(i)}; i.onerror=()=>{clearTimeout(t); res(null)}; i.src=u });
       if(im) return {im, url:u};
     }
+    /* falhou (arquivo ausente ou rede instável): permite nova tentativa depois de 20 s */
+    setTimeout(()=>IMGS.delete(key),20000);
     return null;
   })();
   IMGS.set(key,p); return p;
@@ -121,15 +123,28 @@ const existe = key => carregarImagem(key).then(r=>!!r);
 /* SVG sem largura/altura fixas não tem tamanho definido no canvas: define um tamanho a partir do viewBox */
 async function carregarSVG(url){
   try{
-    const r=await fetch(url); if(!r.ok) return null;
+    const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),15000);
+    const r=await fetch(url,{signal:ctl.signal}); clearTimeout(to); if(!r.ok) return null;
     let t=await r.text(); const m=t.match(/<svg\b[^>]*>/i); if(!m) return null;
-    const tag=m[0], vb=tag.match(/viewBox\s*=\s*["']\s*([-\d.e]+)[\s,]+([-\d.e]+)[\s,]+([-\d.e]+)[\s,]+([-\d.e]+)/i);
-    if(vb && +vb[3]>0 && +vb[4]>0){
-      const k=512/Math.max(+vb[3],+vb[4]), w=Math.round(+vb[3]*k), h=Math.round(+vb[4]*k);
-      t=t.replace(tag, tag.replace(/\s(width|height)\s*=\s*["'][^"']*["']/gi,'').replace(/<svg\b/i,`<svg width="${w}" height="${h}"`));
-    }
+    let tag=m[0];
+    const num=a=>{ const v=(tag.match(new RegExp('\\s'+a+'\\s*=\\s*["\']\\s*([\\d.]+)\\s*(px)?\\s*["\']','i'))||[])[1]; return v?+v:0 };
+    const vb=tag.match(/viewBox\s*=\s*["']\s*([-\d.e]+)[\s,]+([-\d.e]+)[\s,]+([-\d.e]+)[\s,]+([-\d.e]+)/i);
+    let vw=vb?+vb[3]:num('width'), vh=vb?+vb[4]:num('height');
+    if(!(vw>0&&vh>0)){ vw=vh=512 }
+    const k=512/Math.max(vw,vh), w=Math.round(vw*k), h=Math.round(vh*k);
+    let novo=tag.replace(/\s(width|height)\s*=\s*["'][^"']*["']/gi,'').replace(/<svg\b/i,`<svg width="${w}" height="${h}"`);
+    if(!vb) novo=novo.replace(/<svg\b/i,`<svg viewBox="0 0 ${vw} ${vh}"`);
+    if(!/xmlns\s*=/.test(novo)) novo=novo.replace(/<svg\b/i,'<svg xmlns="http://www.w3.org/2000/svg"');
+    t=t.replace(tag,novo);
     const src=URL.createObjectURL(new Blob([t],{type:'image/svg+xml'}));
-    return await new Promise(res=>{ const i=new Image(); i.onload=()=>res(i.naturalWidth?i:null); i.onerror=()=>res(null); i.src=src });
+    const im=await new Promise(res=>{ const i=new Image(); const tt=setTimeout(()=>res(null),10000);
+      i.onload=()=>{clearTimeout(tt); res(i)}; i.onerror=()=>{clearTimeout(tt); res(null)}; i.src=src });
+    if(!im) return null;
+    /* converte para imagem comum (canvas): desenhar SVG a cada quadro é lento e falha em alguns navegadores */
+    const c=document.createElement('canvas'); c.width=w; c.height=h;
+    c.getContext('2d').drawImage(im,0,0,w,h);
+    URL.revokeObjectURL(src);
+    return c;
   }catch(e){ return null }
 }
 async function filtrarComImagem(tipo, nomes){ const ok=await Promise.all(nomes.map(n=>existe(tipo+':'+slug(n)))); return nomes.filter((_,i)=>ok[i]) }
