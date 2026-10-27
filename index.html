@@ -563,17 +563,13 @@ function montarLayout(r,k){
   L.prompt={lines, y:y+ps*.85, size:ps, lh:ps*1.08}; y+=lines.length*ps*1.08+6;
   y+=6*k;
   if(r.lista){
-    /* escalação em lista corrida, na ordem do CSV; o jogador que falta aparece como "?" */
-    const fs=Math.round(24*k), hh=fs*1.75, gap=8*k, padX=fs*.7, nomes=r.lista.titulares.map((n,i)=>i===r.lista.falta?'?':n);
-    setF(fs,700); const larg=nomes.map(n=>g.measureText(n).width+padX*2);
-    if(Math.max(...larg)>IW) L.okLinhas=false;
-    const fileiras=[[]]; let w=0;
-    nomes.forEach((n,i)=>{ const lw=n==='?'?Math.max(larg[i],fs*3):larg[i]; if(fileiras.at(-1).length&&w+gap+lw>IW){ fileiras.push([]); w=0 } w+=(fileiras.at(-1).length?gap:0)+lw; fileiras.at(-1).push({i,lw}) });
-    const itens=[];
-    fileiras.forEach((f,ri)=>{ const tot=f.reduce((a,b)=>a+b.lw,0)+gap*(f.length-1); let cx=X+pad+(IW-tot)/2;
-      f.forEach(c=>{ itens.push({i:c.i, x:cx, y:y+ri*(hh+gap), w:c.lw, h:hh}); cx+=c.lw+gap }) });
+    /* escalação em lista, um nome por linha, na ordem do CSV; o jogador que falta aparece como "?" */
+    const fs=Math.round(23*k), hh=fs*1.5, gap=4*k, padX=fs*.9;
+    setF(fs,700); const larg=Math.min(IW, Math.max(...r.lista.titulares.map(n=>g.measureText(n).width))+padX*2);
+    if(larg>=IW) L.okLinhas=false;
+    const itens=r.lista.titulares.map((n,i)=>({i, x:X+pad+(IW-larg)/2, y:y+i*(hh+gap), w:larg, h:hh}));
     L.lista={itens, fs};
-    y+=fileiras.length*(hh+gap)-gap+12*k;
+    y+=itens.length*(hh+gap)-gap+12*k;
   }
   if(r.campo){
     /* coordenadas do campinho (x da esquerda para a direita, y do próprio gol ao ataque, de 0 a 100) */
