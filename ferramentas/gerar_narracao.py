@@ -28,7 +28,9 @@ VOZ = os.environ.get("AZURE_TTS_VOZ", "pt-BR-AntonioNeural")
 VELOCIDADE = os.environ.get("AZURE_TTS_VELOCIDADE", "+5%")
 
 FIXAS = ["Quem é o jogador?", "Quem jogou em", "e", "Quem nunca jogou no", "Quem nunca jogou na",
-         "De qual clube é este escudo?", "Quem falta no", "Quem falta na", "Fim de jogo!"]
+         "De qual clube é este escudo?", "Quem falta no", "Quem falta na", "Fim de jogo!",
+         # nomes dos jogos (narrados na 1ª rodada quando a câmera está ligada)
+         "Adivinhe pela carreira", "Jogou em todos", "Quem é o intruso?", "Adivinhe o escudo", "Escalação campeã", "Quiz do futebol paulista"]
 # mesma lista de js/dados.js
 PRONUNCIA = {"Botafogo-SP": "Botafogo de Ribeirão Preto", "Juventus-SP": "Juventus da Mooca", "Nacional-SP": "Nacional",
              "Comercial-SP": "Comercial", "River Plate (URU)": "River Plate", "Universidad Católica (EQU)": "Universidad Católica",
