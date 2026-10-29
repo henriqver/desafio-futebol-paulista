@@ -181,6 +181,8 @@ const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const SEGUNDA_CHANCE = false;
 /* fotos/iniciais dos jogadores nas alternativas (desligado enquanto não houver fotos) */
 const MOSTRAR_AVATAR = false;
+/* narração completa só sem câmera; com câmera ligada, o narrador diz apenas o nome do jogo */
+const narracaoReduzida = () => !!S.camOk;
 const PONTOS_2A_TENTATIVA = 1.5;
 const pontosAcerto = (restanteSeg,total) => Math.round((5+5*Math.pow(Math.max(0,restanteSeg)/total,1.5))*10)/10;
 const fmtPts = n => (Math.round(n*10)/10).toLocaleString('pt-BR',{minimumFractionDigits:1, maximumFractionDigits:1});
@@ -567,6 +569,8 @@ function novaRodada(){
   posicionarOverlays(); SFX.whoosh(); ligarRelogio();
   const r=S.rodadas[S.i]; sr.textContent=`Rodada ${S.i+1}. ${r.fala}`;
   /* o enunciado do jogo só é lido na primeira rodada; nas demais, apenas o conteúdo (clubes, pergunta do quiz) */
+  /* com câmera: narra só o nome do jogo na 1ª rodada; depois, apenas efeitos sonoros (a pessoa fala à vontade no vídeo) */
+  if(narracaoReduzida()){ if(S.i===0) falar(S.game.nome, [S.game.nome]); else { NARR.id++; pararFala() } return }
   const curta = S.i>0 && r.falaCurta!==undefined;
   const texto = curta ? r.falaCurta : r.fala, seg = curta ? r.falaSegCurta : r.falaSeg;
   if(texto) falar(texto, seg); else { NARR.id++; pararFala() }
@@ -589,7 +593,7 @@ function responder(valor){
     S.fb={k:'ok', t:'Acertou!', at:now}; S.pop={t:'+'+fmtPts(pts), at:now}; confete(); SFX.acerto(); sr.textContent=`Acertou: ${r.certa}. Mais ${fmtPts(pts)} pontos.`;
     posicionarOverlays();
     /* a próxima rodada só começa depois de o nome ser lido */
-    Promise.all([espera(1300), espera(250).then(()=>falar(pronuncia(r.certa),[r.certa]))]).then(proxima);
+    Promise.all([espera(1300), narracaoReduzida() ? 0 : espera(250).then(()=>falar(pronuncia(r.certa),[r.certa]))]).then(proxima);
   } else if(S.tentativa===1 && SEGUNDA_CHANCE){
     if(valor) S.desabilitadas.push(valor);
     S.fb={k:'retry', t: valor==null?'Tempo! Mais uma chance':'Errou! Mais uma chance', at:now}; S.shakeAt=now; SFX.erro(); sr.textContent=S.fb.t;
