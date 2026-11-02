@@ -127,6 +127,16 @@ h1,h2,h3{font-family:"Montserrat",sans-serif; line-height:1.05; margin:0; text-t
 .acoes .btn{width:100%; font-size:17px; padding:17px}
 .filtros{display:flex; gap:10px}
 .filtros .tg{flex:1; background:var(--vidro); border:1px solid var(--vidro-borda); border-radius:14px; padding:12px 14px; font-weight:600}
+.esc-rank{width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,.92); display:grid; place-items:center; position:relative; overflow:hidden; flex:none}
+.esc-rank b{font-size:11px; font-weight:900; color:var(--noite)}
+.esc-rank img{position:absolute; inset:16%; width:68%; height:68%; object-fit:contain; display:none}
+.esc-rank.com img{display:block} .esc-rank.com b{display:none}
+.censura{display:inline-block; width:120px; height:14px; border-radius:4px; background:repeating-linear-gradient(135deg,rgba(255,255,255,.55) 0 6px,rgba(255,255,255,.3) 6px 12px); vertical-align:middle}
+.rank td:last-child{white-space:nowrap}
+.rank .pts{vertical-align:middle}
+.rede{display:inline-grid; place-items:center; width:30px; height:30px; margin-left:8px; border-radius:50%; background:rgba(255,255,255,.12); color:#fff; vertical-align:middle}
+.rede:hover{background:var(--laranja)}
+.rede svg{width:18px; height:18px}
 .rank .av{width:34px; height:34px; border-radius:50%; display:block; flex:none}
 .rank .pessoa{display:flex; align-items:center; gap:10px}
 .rank .perfil{display:block; font-size:12px; color:var(--muted); font-weight:500}
@@ -152,7 +162,7 @@ video.preview{width:100%; border-radius:18px; background:#000; aspect-ratio:9/16
 <body>
 <div class="app" id="app"></div>
 <div class="sr" aria-live="polite" id="sr"></div>
-<script src="js/dados.js?v=2026-10-30"></script>
+<script src="js/dados.js?v=2026-10-31"></script>
 <script>
 
 /* =========================================================
@@ -446,13 +456,25 @@ function avatarURL(nome){
 }
 const AVATAR_IMG={};
 function avatarImg(nome){ if(!AVATAR_IMG[nome]){ const i=new Image(); i.src=avatarURL(nome); AVATAR_IMG[nome]=i } const i=AVATAR_IMG[nome]; return i.complete&&i.naturalWidth?i:null }
+/* ícone do link da participação, pela rede social do endereço */
+function iconeRede(url){
+  const u=(url||'').toLowerCase(), rede=u.includes('instagram')?'Instagram':u.includes('tiktok')?'TikTok':(u.includes('youtu')?'YouTube':'Vídeo');
+  const svg={Instagram:'<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor"/>',
+    TikTok:'<path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.4 2.6 2.2 4.4 5 4.6"/>',
+    YouTube:'<rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.2v5.6l4.8-2.8z" fill="currentColor"/>',
+    'Vídeo':'<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z" fill="currentColor"/>'}[rede];
+  return `<a class="rede" href="${esc(url)}" target="_blank" rel="noopener" aria-label="Assistir no ${rede}" title="Assistir no ${rede}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${svg}</svg></a>`;
+}
 function tabelaRanking(lista, voce){
   const linhas = lista.slice(); if(voce!=null) linhas.push({nome:'Você', perfil:'Esta partida', pontos:voce, voce:true});
   linhas.sort((a,b)=>b.pontos-a.pontos);
   if(!linhas.length) return '<p class="note">O ranking deste desafio ainda não foi publicado.</p>';
+  const foto=r=> r.voce ? '' : r.ficticio ? `<img class="av" src="${avatarURL(r.nome)}" alt="">` : `<span class="esc-rank" data-clube="${esc(r.clube||'')}"><b>${esc(r.clube?iniciais(r.clube):'?')}</b><img alt=""></span>`;
+  const nome=r=> r.censurado ? `<span class="censura" aria-label="Participante ainda não divulgado"></span>` : esc(r.nome);
+  const perfil=r=> [r.perfil, r.censurado?'em breve':'', (!r.ficticio&&!r.voce&&r.clube)?r.clube:''].filter(Boolean).join(' · ');
   return `<table class="rank">${linhas.map((r,k)=>`<tr class="${r.voce?'voce':''} entra" style="--d:${.1+k*.05}s"><td>${k+1}</td>
-    <td><div class="pessoa">${r.voce?'':`<img class="av" src="${avatarURL(r.nome)}" alt="">`}<div>${esc(r.nome)}${r.video?` <a href="${esc(r.video)}" target="_blank" rel="noopener">vídeo</a>`:''}<span class="perfil">${esc(r.perfil||'')}</span></div></div></td>
-    <td>${fmtPts(r.pontos)}</td></tr>`).join('')}</table>`;
+    <td><div class="pessoa">${foto(r)}<div>${nome(r)}<span class="perfil">${esc(perfil(r))}</span></div></div></td>
+    <td><span class="pts">${fmtPts(r.pontos)}</span>${r.video&&!r.censurado?iconeRede(r.video):''}</td></tr>`).join('')}</table>`;
 }
 
 const INTRO={
@@ -485,7 +507,7 @@ function exemploHTML(id){
   return '';
 }
 function hidratarEscudos(raiz){
-  raiz.querySelectorAll('.esc[data-clube]').forEach(el=>{
+  raiz.querySelectorAll('.esc[data-clube], .esc-rank[data-clube]').forEach(el=>{ if(!el.dataset.clube) return;
     carregarImagem('clube:'+slug(el.dataset.clube)).then(r=>{ if(r){ el.querySelector('img').src=r.url; el.classList.add('com') } });
   });
 }
@@ -614,7 +636,7 @@ function posicaoNoRanking(){ const l=rankingDe(S.game.id); return l.filter(x=>x.
 
 async function finalizar(){
   S.final=true; S.finalAt=performance.now(); S.layout=null; clearInterval(tick); musicaDesliga(); posicionarOverlays();
-  SFX.fanfarra(); const ac=S.log.filter(l=>l.ok).length; linhasRankingFinal().forEach(l=>avatarImg(l.nome));
+  SFX.fanfarra(); const ac=S.log.filter(l=>l.ok).length; linhasRankingFinal().forEach(l=>{ if(l.ficticio) avatarImg(l.nome); else if(l.clube) imgDe('clube:'+slug(l.clube)) });
   falar(`Fim de jogo! Você fez ${fmtPts(S.pontos)} pontos e acertou ${ac} de ${S.rodadas.length}.`, ['Fim de jogo!']);
   const linhas=linhasRankingFinal().length;
   for(let k=0;k<linhas;k++){ setTimeout(()=>{ if(S.tela==='play') SFX.pop() }, 2200+k*260) }
@@ -984,8 +1006,13 @@ function linhasRankingFinal(){
   if(out.length<=6) return out;
   return pos<6 ? out.slice(0,6) : [...out.slice(0,5), out[pos]];
 }
+/* endereço do jogo no fim do vídeo (é o próprio endereço em que o jogo está publicado) */
+const LINK_JOGO = (location.host+location.pathname).replace(/index\.html$/,'').replace(/\/$/,'');
 function finalQuadro(now){
-  const t=(now-S.finalAt)/1000, top=S.camOk?Math.round(H*.5):170, bot=H-36;
+  const t=(now-S.finalAt)/1000, top=S.camOk?Math.round(H*.5):170, bot=H-110;
+  if(t>1.2){ g.globalAlpha=clamp01((t-1.2)/.5); rr(36,H-96,W-72,64,32); g.fillStyle=C.placar; g.fill();
+    txt('Jogue também:',W/2,H-76,20,{w:700,align:'center',base:'middle',cor:'#fff'});
+    txt(LINK_JOGO,W/2,H-52,caber(LINK_JOGO,W-120,26,800),{w:800,align:'center',base:'middle',cor:'#fff'}); g.globalAlpha=1 }
   const p0=RM?1:easeBack(t/.5);
   g.save(); g.translate(W/2,top+50); g.scale(p0,p0); txt('FIM DE JOGO!',0,0,54,{w:900,align:'center',base:'middle'}); g.restore();
   const cont=RM?1:ease((t-.5)/1.3), vs=S.pontos*cont;
@@ -1001,9 +1028,11 @@ function finalQuadro(now){
     if(l.voce&&!RM){ g.lineWidth=3+Math.sin(now/160)*2; g.strokeStyle='rgba(255,194,51,.6)'; g.stroke() }
     const cor=C.giz, my=y+(rowH-8)/2+2;
     txt(l.pos+'º',x+22,my,34,{w:800,cor,base:'middle'});
-    let nx=x+90; const av=l.voce?null:avatarImg(l.nome), ad=Math.min(48,rowH-20);
-    if(av){ g.save(); g.beginPath(); g.arc(nx+ad/2,my,ad/2,0,Math.PI*2); g.clip(); g.drawImage(av,nx,my-ad/2,ad,ad); g.restore(); nx+=ad+14 }
-    const nf=caber(l.nome,x+w-150-nx,30,700); txt(l.nome,nx,my,nf,{w:700,cor,base:'middle'});
+    let nx=x+90; const ad=Math.min(48,rowH-20);
+    if(!l.voce && l.ficticio){ const av=avatarImg(l.nome); if(av){ g.save(); g.beginPath(); g.arc(nx+ad/2,my,ad/2,0,Math.PI*2); g.clip(); g.drawImage(av,nx,my-ad/2,ad,ad); g.restore() } nx+=ad+14 }
+    else if(!l.voce && l.clube){ escudo(l.clube,nx+ad/2,my-ad/2,ad); nx+=ad+14 }
+    if(l.censurado){ rr(nx,my-10,Math.min(220,x+w-150-nx),20,5); g.fillStyle='rgba(255,255,255,.45)'; g.fill() }
+    else { const nf=caber(l.nome,x+w-150-nx,30,700); txt(l.nome,nx,my,nf,{w:700,cor,base:'middle'}) }
     txt(fmtPts(l.pontos),x+w-22,my,32,{w:800,cor,align:'right',base:'middle'});
     g.restore();
   });
@@ -1062,6 +1091,7 @@ function renderResult(){
   const conta=now=>{ const p=RM?1:ease((now-t0)/1200); big.textContent=fmtPts(alvo*p); if(p<1) requestAnimationFrame(conta) }; requestAnimationFrame(conta);
   const msg=m=>{ const e=document.getElementById('msg'); if(e) e.textContent=m };
   if(S.video){ document.getElementById('share').onclick=()=>compartilhar(msg); document.getElementById('salvar').onclick=()=>salvar(msg) }
+  hidratarEscudos(app);
   document.getElementById('denovo').onclick=()=>go('intro');
   document.getElementById('inicio').onclick=()=>go('home');
 }
