@@ -88,7 +88,9 @@ async function carregarDados(){
   const jogos=['carreira','dois-clubes','intruso','escudo','escalacao','quiz'];
   RANKING_FIXO=Object.fromEntries(jogos.map(g=>[g,[]]));
   rank.forEach(r=>{ const g=slug(col(r,'Jogo')), bruto=String(col(r,'Pontos')).trim(), pts=parseFloat(bruto.includes(',')?bruto.replace(/\./g,'').replace(',','.'):bruto);
-    if(RANKING_FIXO[g]&&col(r,'Nome')&&pts>=0) RANKING_FIXO[g].push({nome:col(r,'Nome'), pontos:pts, video:col(r,'Link do vídeo','Video','Link')}) });
+    /* sem link do vídeo (ou sem nome) = participação ainda não divulgada: o nome aparece censurado */
+    const nome=col(r,'Nome'), video=col(r,'Link do vídeo','Video','Link');
+    if(RANKING_FIXO[g]&&pts>=0) RANKING_FIXO[g].push({nome:(nome&&video)?nome:'', censurado:!(nome&&video), perfil:col(r,'Perfil'), clube:clubeOk(col(r,'Clube')), pontos:pts, video}) });
   esc.forEach(r=>{ const c=col(r,'Clube'), a=col(r,'Arquivo'); if(c&&a){ DB.mapaEscudos[slug(clubeOk(c))]=a; DB.clubesComEscudo.push(clubeOk(c)) } });
 }
 /* Imagens: tenta o nome registrado em escudos.csv (aceita alternativas separadas por "|")
