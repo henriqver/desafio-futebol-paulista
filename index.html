@@ -239,7 +239,7 @@ function rodadasDois(){
   for(let t=0;t<600&&out.length<10;t++){
     const j=base[Math.random()*base.length|0], A=j.paulistas[Math.random()*j.paulistas.length|0];
     const Bs=[...new Set(j.carreira)].filter(c=>c!==A&&(freq.get(c)||0)>=2); if(!Bs.length) continue;
-    const B=Bs[Math.random()*Bs.length|0], chave=[A,B].sort().join('|'); if(usados.has(chave)) continue;
+    const B=Bs[Math.random()*Bs.length|0], chave=[A,B].sort().join('|'); if(usados.has(chave)||out.some(o=>o.certa===j.nome)) continue;
     const cand=DB.jogadores.filter(d=>d!==j&&jogouEm(d,A)&&naoJogouEm(d,B))
       .map(d=>({nome:d.nome, s:Math.max(0,...clubesDe(d).filter(c=>c!==A).map(c=>simClube(c,B)))+Math.random()*.9}));
     if(cand.length<3) continue;
@@ -268,7 +268,7 @@ function rodadasIntruso(){
   if(!clubes.length) return [];
   return Array.from({length:10},(_,i)=>{
     const c=clubes[i%clubes.length], jogaram=shuffle(DB.porClube.get(c)).slice(0,5).map(j=>j.nome);
-    const fora=DB.jogadores.filter(j=>!j.paulistas.includes(c)), parecidos=fora.filter(j=>j.paulistas.some(p=>GRANDES.includes(p)));
+    const fora=DB.jogadores.filter(j=>!j.paulistas.includes(c)&&!j.carreira.includes(c)), parecidos=fora.filter(j=>j.paulistas.some(p=>GRANDES.includes(p)));
     const intr=shuffle(parecidos.length?parecidos:fora)[0].nome;
     return {prompt:`Quem nunca jogou ${artigo(c)} ${c}?`, clube:c, opcoes:shuffle([...jogaram,intr]), avatares:true, certa:intr, fala:`Quem nunca jogou ${artigo(c)} ${pronuncia(c)}?`, falaSeg:[`Quem nunca jogou ${artigo(c)}`, c], falaCurta:pronuncia(c), falaSegCurta:[c]};
   });
